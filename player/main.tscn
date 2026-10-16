@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_overdrive.png" id="10_icon_overdrive"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_shotgun.png" id="11_icon_shotgun"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_grenade_launcher.png" id="12_icon_grenade"]
+[ext_resource type="Texture2D" path="res://player/shop_icons/icon_battery.png" id="14_icon_battery"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shop"]
 bg_color = Color(0.02, 0.03, 0.08, 0.94)
@@ -151,6 +152,9 @@ offset_top = 138.0
 offset_right = 525.0
 offset_bottom = 184.0
 text = "Batería Extra — 10 Fragmentos (+2 HP máximo)"
+icon = ExtResource("14_icon_battery")
+expand_icon = true
+theme_override_constants/icon_max_width = 40
 
 [node name="Armería" type="Control" parent="UI/ShopPanel/ShopTabs" unique_id=1709678605]
 visible = false

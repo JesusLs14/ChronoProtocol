@@ -74,4 +74,5 @@ func _collect(player: Node2D) -> void:
 	_collected = true
 	remove_from_group("fragments")
 	player.add_fragment(amount)
+	Sfx.play("pickup", -4.0, 0.06)
 	queue_free()

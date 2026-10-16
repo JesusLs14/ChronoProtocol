@@ -66,6 +66,7 @@ func _explode() -> void:
 	var screen_shake := get_tree().get_first_node_in_group("screen_shake")
 	if screen_shake != null:
 		screen_shake.shake()
+	Sfx.play("explosion", 0.0, 0.08)
 	queue_redraw()
 
 

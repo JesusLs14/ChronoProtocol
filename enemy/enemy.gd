@@ -13,6 +13,10 @@ extends CharacterBody2D
 @onready var health_component: Variant = $HealthComponent
 
 var _is_dead: bool = false
+# Flotación del dron: solo mueve el sprite, no la colisión.
+const HOVER_AMPLITUDE: float = 6.0
+const HOVER_SPEED: float = 3.0
+var _hover_time: float = randf() * TAU
 
 
 func _ready() -> void:
@@ -26,9 +30,12 @@ func _ready() -> void:
 	sprite.animation_finished.connect(_on_animation_finished)
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if _is_dead:
 		return
+
+	_hover_time += delta
+	sprite.position.y = sin(_hover_time * HOVER_SPEED) * HOVER_AMPLITUDE
 
 	velocity = Vector2.ZERO
 	var player := get_tree().get_first_node_in_group("player") as Node2D
@@ -36,7 +43,7 @@ func _physics_process(_delta: float) -> void:
 		return
 
 	sprite.flip_h = player.global_position.x < global_position.x
-	if sprite.animation != &"hurt" or not sprite.is_playing():
+	if sprite.animation not in [&"hurt", &"shoot"] or not sprite.is_playing():
 		sprite.play(&"idle")
 
 
@@ -56,6 +63,8 @@ func _on_shoot_timer_timeout() -> void:
 	get_parent().add_child(bullet)
 	bullet.global_position = global_position
 	bullet.look_at(player.global_position)
+	if sprite.animation != &"hurt" or not sprite.is_playing():
+		sprite.play(&"shoot")
 
 
 func _on_health_took_damage(_current_health: int, _damage_amount: int) -> void:
@@ -102,5 +111,5 @@ func _spawn_fragment_deferred(spawn_position: Vector2) -> void:
 func _on_animation_finished() -> void:
 	if sprite.animation == &"death":
 		queue_free()
-	elif sprite.animation == &"hurt" and not _is_dead:
+	elif sprite.animation in [&"hurt", &"shoot"] and not _is_dead:
 		sprite.play(&"idle")

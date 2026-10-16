@@ -31,5 +31,10 @@
 - **Destello de daño de drones y arañas:** antes cambiaba a blanco un sprite que ya era blanco y no se veía; ahora brilla (`hit_flash_component.gd`).
 - Se quitó una conexión rota del botón Retry a una función que no existía.
 
+## Cuarta ronda: dron, sonidos e icono
+- **Dron animado** (traído de ChronoProtocol, `enemy/enemy.gd` y `enemy.tscn`): flota subiendo y bajando, reproduce su animación al disparar y la animación de daño ya no corta al dron.
+- **Sonidos nuevos** (`sfx/`, generados con `generate_sfx.py`): explosión de la granada, clic y sonido al pasar por cualquier botón, y campanita al recoger fragmentos. Los reproduce el autoload `Sfx` (`sfx/sfx.gd`), que conecta solo todos los botones del juego y evita que el imán de fragmentos sature el sonido.
+- **Icono de Batería Extra** (`player/shop_icons/icon_battery.png`, dibujado con `draw_battery_icon.py`): batería con celdas cian y un "+" verde.
+
 ## No traído
-- Las animaciones nuevas del jefe y del dron de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.
+- Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.
