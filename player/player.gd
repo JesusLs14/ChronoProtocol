@@ -10,18 +10,37 @@ signal health_changed(current_health: int, max_health: int)
 var current_health: int = 10
 var is_dead: bool = false
 var has_shotgun: bool = false
+var has_grenade_launcher: bool = false
 var unlocked_weapons: Array[String] = ["pistol"]
 var current_weapon_index: int = 0
 var current_weapon: String = "pistol"
+@export var grenade_weapon: WeaponData
 @export var dash_speed: float = 900.0
 @export var dash_duration: float = 0.18
 @export var dash_invulnerability_duration: float = 0.25
 @export var dash_cooldown: float = 0.8
 var core_fragments: int = 0
-@onready var anim_sprite = $AnimatedSprite2D
+# Al soltar las teclas la velocidad decae exponencialmente sin llegar a cero;
+# por debajo de este valor el soldado ya se muestra en reposo.
+const RUN_ANIMATION_MIN_SPEED: float = 10.0
+@onready var anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hit_flash: HitFlashComponent = $HitFlashComponent
 @onready var weapon_manager: WeaponManager = $WeaponManager
-@onready var weapon_pivot: Node2D = $WeaponPivot
+@onready var muzzle: Marker2D = $Muzzle
+@onready var damage_overlay: ColorRect = $CanvasLayer/DamageOverlay
+
+# Distancia a la que se coloca el punto de mira cuando se apunta con el stick.
+const STICK_AIM_DISTANCE: float = 400.0
+const DAMAGE_OVERLAY_ALPHA: float = 0.35
+const DAMAGE_OVERLAY_DURATION: float = 0.3
+var _damage_overlay_tween: Tween
+
+# Tiempo que el soldado sigue apuntando después del último disparo.
+const AIM_HOLD_TIME: float = 0.35
+
+var _fire_held: bool = false
+var _aim_time_remaining: float = 0.0
+var _aim_rig: SoldierAimRig
 
 var _dash_direction := Vector2.ZERO
 var _dash_time_remaining: float = 0.0
@@ -35,6 +54,7 @@ func _ready() -> void:
 	var health_container: HBoxContainer = $CanvasLayer/HBoxContainer
 	health_changed.connect(health_container.update_health)
 	health_changed.emit(current_health, max_health)
+	_build_aim_rig()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -59,18 +79,38 @@ func _unhandled_input(event: InputEvent) -> void:
 			current_weapon = unlocked_weapons[current_weapon_index]
 			return
 
-	if not event.is_action_pressed("shoot"):
-		return
+	if event.is_action_pressed("shoot"):
+		_fire_held = true
+		_try_fire()
 
-	var fired: bool
-	var aim_position := _get_aim_position()
+
+# El botón se suelta aunque el clic termine sobre la interfaz.
+func _input(event: InputEvent) -> void:
+	if event.is_action_released("shoot"):
+		_fire_held = false
+
+
+# Mantener el clic dispara de forma continua, a la cadencia de cada arma.
+func _try_fire() -> void:
+	if is_dead or current_health <= 0 or _dash_time_remaining > 0.0:
+		return
+	var target := _get_aim_position()
+	_set_facing(target.x < global_position.x)
+	_aim_time_remaining = maxf(_aim_time_remaining, 0.01)
+	_update_aim_pose()
+	var fired := false
 	if current_weapon == "shotgun":
-		fired = weapon_manager.fire_at(aim_position, 5, 45.0, 0.8)
+		fired = weapon_manager.fire_at(target, 5, 45.0, 0.8)
+	elif current_weapon == "grenade_launcher":
+		fired = weapon_manager.fire_weapon_at(grenade_weapon, target)
 	else:
-		fired = weapon_manager.fire_at(aim_position)
+		fired = weapon_manager.fire_at(target)
 	if fired:
-		anim_sprite.play("shoot")
+		_aim_time_remaining = AIM_HOLD_TIME
+		_aim_rig.play_flash()
 		$SfxShoot.play()
+		if anim_sprite.animation != &"hurt":
+			anim_sprite.play("shoot")
 
 
 func _physics_process(delta: float) -> void:
@@ -79,13 +119,7 @@ func _physics_process(delta: float) -> void:
 
 	_dash_cooldown_remaining = maxf(0.0, _dash_cooldown_remaining - delta)
 	_invulnerability_time_remaining = maxf(0.0, _invulnerability_time_remaining - delta)
-	var aim_vector := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
-	var aim_position := get_global_mouse_position()
-	if aim_vector.length() > 0.2:
-		aim_position = global_position + aim_vector
-		look_at(aim_position)
-	anim_sprite.flip_h = aim_position.x < global_position.x
-	weapon_pivot.look_at(aim_position)
+	_aim_time_remaining = maxf(0.0, _aim_time_remaining - delta)
 
 	var input_direction: Vector2 = _get_move_direction()
 	if Input.is_action_just_pressed("dash") and _dash_cooldown_remaining == 0.0:
@@ -101,6 +135,7 @@ func _physics_process(delta: float) -> void:
 			_trail_time_remaining = 0.04
 		if _dash_time_remaining == 0.0:
 			velocity = _dash_direction * speed
+		_update_animation()
 		return
 
 	var weight: float
@@ -114,7 +149,12 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	if _fire_held and not Input.is_action_pressed("shoot"):
+		_fire_held = false
+	if _fire_held:
+		_try_fire()
 	_update_animation()
+	_update_aim_pose(delta)
 
 
 func _start_dash(input_direction: Vector2) -> void:
@@ -122,13 +162,12 @@ func _start_dash(input_direction: Vector2) -> void:
 	if _dash_direction == Vector2.ZERO:
 		_dash_direction = velocity.normalized()
 	if _dash_direction == Vector2.ZERO:
-		_dash_direction = get_global_mouse_position() - global_position
+		_dash_direction = _get_aim_position() - global_position
 	_dash_direction = _dash_direction.normalized()
 	_dash_time_remaining = dash_duration
 	_dash_cooldown_remaining = dash_cooldown
 	_invulnerability_time_remaining = dash_invulnerability_duration
 	_trail_time_remaining = 0.0
-	anim_sprite.play("dash")
 
 
 func _spawn_dash_trail() -> void:
@@ -144,17 +183,78 @@ func _spawn_dash_trail() -> void:
 
 
 func _update_animation() -> void:
-	if (
-		is_dead
-		or _dash_time_remaining > 0.0
-		or (anim_sprite.animation == "shoot" and anim_sprite.is_playing())
-	):
+	if current_health <= 0:
 		return
 
-	if velocity.length() > 0:
+	_update_facing()
+	if _dash_time_remaining > 0.0:
+		_aim_time_remaining = 0.0
+		_show_aim_rig(false)
+		anim_sprite.play("dash")
+		return
+	if anim_sprite.animation in [&"shoot", &"hurt"] and anim_sprite.is_playing():
+		return
+
+	if velocity.length() > RUN_ANIMATION_MIN_SPEED:
 		anim_sprite.play("run")
 	else:
 		anim_sprite.play("idle")
+
+
+# Al correr o hacer dash el soldado mira hacia donde se mueve; al disparar o
+# estar quieto mira hacia el ratón.
+func _update_facing() -> void:
+	if not _is_aiming() and absf(velocity.x) > RUN_ANIMATION_MIN_SPEED:
+		_set_facing(velocity.x < 0.0)
+	else:
+		_set_facing(_get_aim_position().x < global_position.x)
+
+
+# Voltea al soldado y lleva la boca del arma al mismo lado.
+func _set_facing(face_left: bool) -> void:
+	anim_sprite.flip_h = face_left
+	muzzle.position.x = -absf(muzzle.position.x) if face_left else absf(muzzle.position.x)
+	if _aim_rig != null:
+		_aim_rig.scale.x = -1.0 if face_left else 1.0
+
+
+func _is_aiming() -> bool:
+	return (_fire_held or _aim_time_remaining > 0.0) and current_health > 0 \
+		and _dash_time_remaining == 0.0
+
+
+# Pose de disparo en capas (piernas, cuerpo y arma) como hija del
+# AnimatedSprite2D, así hereda su escala y el destello de daño. Mientras
+# apunta, el sprite normal se oculta con self_modulate y solo se dibuja esta pose.
+func _build_aim_rig() -> void:
+	_aim_rig = SoldierAimRig.new()
+	anim_sprite.add_child(_aim_rig)
+	var cell_size := Vector2(SoldierAimRig.CELL_SIZE)
+	_aim_rig.setup(anim_sprite.offset - cell_size * 0.5)
+
+
+func _show_aim_rig(visible_now: bool) -> void:
+	if _aim_rig == null:
+		return
+	_aim_rig.visible = visible_now
+	anim_sprite.self_modulate.a = 0.0 if visible_now else 1.0
+
+
+# Orienta el arma hacia el ratón y lleva la boca del arma (Muzzle) a la punta
+# del cañón girado.
+func _update_aim_pose(delta: float = 0.0) -> void:
+	if _aim_rig == null:
+		return
+	var aiming := _is_aiming() and anim_sprite.animation != &"hurt"
+	_show_aim_rig(aiming)
+	if not aiming:
+		return
+
+	var moving := velocity.length() > RUN_ANIMATION_MIN_SPEED
+	var facing_sign := -1.0 if anim_sprite.flip_h else 1.0
+	var backwards := moving and velocity.x * facing_sign < -RUN_ANIMATION_MIN_SPEED
+	_aim_rig.update_pose(_get_aim_position(), moving, backwards, delta)
+	muzzle.global_position = _aim_rig.get_gun_tip_position()
 
 
 func _get_move_direction() -> Vector2:
@@ -179,13 +279,6 @@ func _get_move_direction() -> Vector2:
 	return direction
 
 
-func _get_aim_position() -> Vector2:
-	var aim_vector := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
-	if aim_vector.length() > 0.2:
-		return global_position + aim_vector
-	return get_global_mouse_position()
-
-
 func take_damage() -> void:
 	if _invulnerability_time_remaining > 0.0 or current_health <= 0:
 		return
@@ -193,24 +286,41 @@ func take_damage() -> void:
 	current_health = maxi(0, current_health - 1)
 	$SfxHit.play()
 	health_changed.emit(current_health, max_health)
-	if current_health <= 0:
-		is_dead = true
-		velocity = Vector2.ZERO
-		_dash_time_remaining = 0.0
-		anim_sprite.play("death")
-		await anim_sprite.animation_finished
-
-		var main = get_tree().get_first_node_in_group("main")
-		if main == null:
-			push_error("Cannot show game over: no main node exists in the main group.")
-			return
-		main.show_game_over()
-		return
-
 	hit_flash.flash()
+	_flash_damage_overlay()
 	var screen_shake := get_tree().get_first_node_in_group("screen_shake")
 	if screen_shake != null:
 		screen_shake.shake()
+
+	if current_health > 0:
+		anim_sprite.play("hurt")
+		return
+
+	is_dead = true
+	_fire_held = false
+	velocity = Vector2.ZERO
+	_dash_time_remaining = 0.0
+	_show_aim_rig(false)
+	anim_sprite.play("death")
+	await anim_sprite.animation_finished
+
+	var main = get_tree().get_first_node_in_group("main")
+	if main == null:
+		push_error("Cannot show game over: no main node exists in the main group.")
+		return
+	main.show_game_over()
+
+
+# Destello rojo en los bordes de la pantalla al recibir daño.
+func _flash_damage_overlay() -> void:
+	if damage_overlay == null:
+		return
+	if _damage_overlay_tween != null and _damage_overlay_tween.is_running():
+		_damage_overlay_tween.kill()
+	damage_overlay.modulate.a = DAMAGE_OVERLAY_ALPHA
+	_damage_overlay_tween = create_tween()
+	_damage_overlay_tween.tween_property(damage_overlay, "modulate:a", 0.0, DAMAGE_OVERLAY_DURATION)
+
 
 func add_fragment(amount: int) -> void:
 	if amount <= 0:
@@ -218,3 +328,12 @@ func add_fragment(amount: int) -> void:
 		return
 
 	core_fragments += amount
+
+
+# Punto al que apunta el jugador: el stick derecho del mando si se está usando,
+# si no el ratón. Separado para poder simularlo en las pruebas.
+func _get_aim_position() -> Vector2:
+	var aim_vector := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	if aim_vector.length() > 0.2:
+		return global_position + aim_vector.normalized() * STICK_AIM_DISTANCE
+	return get_global_mouse_position()

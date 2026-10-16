@@ -30,8 +30,7 @@ var _flash_tween: Tween
 @onready var attack_timer: Timer = $AttackTimer
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var health_canvas: CanvasLayer = $CanvasLayer
-@onready var health_bar: ProgressBar = $CanvasLayer/BossHealthBar
+@onready var health_bar: BossHealthBar = $BossHealthBar
 
 
 func _ready() -> void:
@@ -39,8 +38,7 @@ func _ready() -> void:
 	health_component.current_health = max_health
 	health_component.took_damage.connect(_on_health_took_damage)
 	health_component.died.connect(_on_health_died)
-	health_bar.max_value = max_health
-	health_bar.value = max_health
+	health_bar.setup(max_health)
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
 	sprite.play("idle")
 	_disable_laser()
@@ -233,7 +231,7 @@ func _disable_laser() -> void:
 func take_damage(damage_amount: int = 1) -> bool:
 	var damage_applied := health_component.take_damage(damage_amount)
 	if damage_applied:
-		health_bar.value = health_component.current_health
+		health_bar.set_health(health_component.current_health)
 		_update_enrage_state(health_component.current_health)
 		$SfxHit.play()
 	return damage_applied
@@ -242,7 +240,7 @@ func take_damage(damage_amount: int = 1) -> bool:
 func _on_health_took_damage(current_health: int, _damage_amount: int) -> void:
 	if _is_defeated:
 		return
-	health_bar.value = current_health
+	health_bar.set_health(current_health)
 	_update_enrage_state(current_health)
 	if _flash_tween != null and _flash_tween.is_running():
 		_flash_tween.kill()
@@ -254,6 +252,7 @@ func _on_health_took_damage(current_health: int, _damage_amount: int) -> void:
 func _update_enrage_state(current_health: int) -> void:
 	if not is_enraged and current_health * 2 < max_health:
 		is_enraged = true
+		health_bar.set_enraged()
 
 
 func _on_health_died() -> void:
@@ -261,7 +260,7 @@ func _on_health_died() -> void:
 		return
 	_is_defeated = true
 	attack_timer.stop()
-	health_canvas.hide()
+	health_bar.fade_out()
 	_disable_laser()
 	velocity = Vector2.ZERO
 	current_state = BossState.IDLE

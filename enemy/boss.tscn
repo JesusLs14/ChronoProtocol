@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://qc6tqqo1l2dg" path="res://enemy/spider_minion.tscn" id="6_spider"]
 [ext_resource type="AudioStream" uid="uid://cwpe7w2hpegc5" path="res://enemy/freesound_community-laser-weld-103309.mp3" id="7_hkla4"]
 [ext_resource type="AudioStream" uid="uid://cajleicd1qdeb" path="res://enemy/soundreality-metal-door-slam-172172.mp3" id="8_icm5i"]
+[ext_resource type="PackedScene" path="res://enemy/boss_health_bar.tscn" id="9_health_bar"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n3pxx"]
 atlas = ExtResource("4_svpuv")
@@ -195,12 +196,6 @@ radius = 88.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_laser"]
 size = Vector2(1000, 24)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b270l"]
-bg_color = Color(0.45953077, 0, 0.061810456, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l1slb"]
-bg_color = Color(1, 0.16470589, 0.078431375, 1)
-
 [node name="Boss" type="CharacterBody2D" unique_id=1717222052 groups=["enemy"]]
 collision_layer = 2
 script = ExtResource("1_boss")
@@ -247,21 +242,7 @@ collision_layer = 0
 position = Vector2(500, 0)
 shape = SubResource("RectangleShape2D_laser")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=808074647]
-
-[node name="BossHealthBar" type="ProgressBar" parent="CanvasLayer" unique_id=1077924079]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -2.0
-offset_right = 2.0
-offset_bottom = 27.0
-grow_horizontal = 2
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(0.8156863, 0, 0, 1)
-theme_override_colors/font_outline_color = Color(1, 0.16470589, 0.078431375, 1)
-theme_override_styles/background = SubResource("StyleBoxFlat_b270l")
-theme_override_styles/fill = SubResource("StyleBoxFlat_l1slb")
+[node name="BossHealthBar" parent="." unique_id=808074647 instance=ExtResource("9_health_bar")]
 
 [node name="SfxHit" type="AudioStreamPlayer2D" parent="." unique_id=652240348]
 stream = ExtResource("6_5r480")
