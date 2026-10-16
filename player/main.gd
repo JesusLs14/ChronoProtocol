@@ -4,6 +4,8 @@ signal wave_ended
 
 const SHOP_TRANSITION_DELAY: float = 2.5
 const MAIN_MENU_PATH: String = "res://menu/main_menu.tscn"
+# Pausa entre la muerte del jefe y la pantalla de victoria.
+const VICTORY_DELAY: float = 1.5
 const KILLS_PER_WAVE: Array[int] = [15, 20, 30, 50, 60]
 const SHOP_COSTS: Array[int] = [5, 8, 10, 12, 15]
 
@@ -33,6 +35,8 @@ func _ready() -> void:
 	spawn_timer.timeout.connect(_spawn_enemy)
 	$UI/GameOverPanel/RetryButton.pressed.connect(_on_retry_pressed)
 	$UI/GameOverPanel/MenuButton.pressed.connect(_on_menu_pressed)
+	$UI/VictoryPanel/Buttons/PlayAgainButton.pressed.connect(_on_retry_pressed)
+	$UI/VictoryPanel/Buttons/MenuButton.pressed.connect(_on_menu_pressed)
 	$UI/ShopPanel/ShopTabs/Clínica/RepairButton.pressed.connect(_on_shop_purchase_pressed.bind(0))
 	$UI/ShopPanel/ShopTabs/Clínica/OverdriveButton.pressed.connect(_on_shop_purchase_pressed.bind(1))
 	$UI/ShopPanel/ShopTabs/Clínica/ExtraBatteryButton.pressed.connect(_on_shop_purchase_pressed.bind(2))
@@ -158,16 +162,12 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 			shop_status_label.text = "Batería máxima aumentada"
 		3:
 			player.has_shotgun = true
-			player.unlocked_weapons.append("shotgun")
-			player.current_weapon_index = player.unlocked_weapons.size() - 1
-			player.current_weapon = "shotgun"
+			player.equip_weapon("shotgun")
 			print("Escopeta comprada")
 			shop_status_label.text = "Escopeta añadida al inventario"
 		4:
 			player.has_grenade_launcher = true
-			player.unlocked_weapons.append("grenade_launcher")
-			player.current_weapon_index = player.unlocked_weapons.size() - 1
-			player.current_weapon = "grenade_launcher"
+			player.equip_weapon("grenade_launcher")
 			print("Lanzagranadas comprado")
 			shop_status_label.text = "Lanzagranadas añadido al inventario"
 	shop_fragments_label.text = "Core Fragments: %d" % player.core_fragments
@@ -199,6 +199,20 @@ func spawn_boss() -> void:
 func _on_boss_defeated() -> void:
 	boss_warning_label.text = "BOSS DEFEATED"
 	boss_warning_label.show()
+	# Las arañas que quedan desaparecen para que no maten al jugador ya ganado.
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		enemy.queue_free()
+	await get_tree().create_timer(VICTORY_DELAY).timeout
+	show_victory()
+
+
+func show_victory() -> void:
+	spawn_timer.stop()
+	boss_warning_label.hide()
+	get_tree().paused = true
+	$UI/VictoryPanel/VictoryScoreLabel.text = "Score: %d" % score
+	$UI/VictoryPanel.show()
+	$UI/VictoryPanel/Buttons/PlayAgainButton.grab_focus()
 
 
 func _update_wave_progress() -> void:

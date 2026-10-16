@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://player/soldier/soldier_aim_parts.png" id="1_parts"]
+
+[resource]
+atlas = ExtResource("1_parts")
+region = Rect2(64, 94, 44, 20)

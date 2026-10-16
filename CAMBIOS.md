@@ -23,5 +23,13 @@
   - El código está en `player/soldier/soldier_aim_rig.gd`, un componente nuevo; `player.gd` solo lo crea y le pasa el ratón.
 - **Iconos en la tienda** (`player/shop_icons/`): corazón en Reparar Chasis, rayo en Sobremarcha, escopeta y lanzagranadas en la Armería. Se les quitó el fondo de cuadros que venía pintado en las imágenes. Batería Extra no tiene icono porque no se envió uno.
 
+## Tercera ronda: jugabilidad
+- **Invulnerabilidad tras un golpe** (`player.gd`, `hurt_invulnerability_duration` = 0.6 s): el soldado parpadea y no recibe más daño durante ese tiempo. En una prueba de 20 s quieto, los golpes recibidos bajaron de 131 a 24 (como máximo 2 por segundo, antes 18).
+- **El jefe ya muere bien:** su animación de muerte estaba en bucle, así que nunca terminaba, el jefe no desaparecía y la partida no se podía ganar. Ahora la animación termina (`enemy/boss.tscn`).
+- **Pantalla de victoria** (`main.tscn`, `main.gd`): aparece 1.5 s después de derrotar al jefe, con el puntaje y botones para jugar de nuevo o ir al menú. Las arañas que quedan desaparecen al morir el jefe.
+- **Arma actual en pantalla** (`player/weapon_hud.gd`, abajo a la izquierda): icono y nombre del arma; da un pequeño salto al cambiar. `Player.equip_weapon()` y la señal `weapon_changed` avisan del cambio.
+- **Destello de daño de drones y arañas:** antes cambiaba a blanco un sprite que ya era blanco y no se veía; ahora brilla (`hit_flash_component.gd`).
+- Se quitó una conexión rota del botón Retry a una función que no existía.
+
 ## No traído
 - Las animaciones nuevas del jefe y del dron de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

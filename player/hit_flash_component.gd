@@ -4,8 +4,10 @@ extends Node
 @export var target_path: NodePath = ^"../AnimatedSprite2D"
 @export var flash_duration: float = 0.12
 @export var peak_duration: float = 0.025
-## Color al que cambia el objetivo durante el destello.
-@export var flash_color: Color = Color.WHITE
+## Color al que cambia el objetivo durante el destello. Por defecto es más
+## brillante que el blanco (valores > 1) para que el destello se note en
+## sprites cuyo modulate ya es blanco.
+@export var flash_color: Color = Color(2.5, 2.5, 2.5, 1.0)
 ## Número de destellos seguidos por cada golpe.
 @export_range(1, 10, 1) var flash_count: int = 1
 

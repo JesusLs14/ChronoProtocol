@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://player/arena.tscn" id="6_arena_scene"]
 [ext_resource type="PackedScene" uid="uid://cy7md8e3ahvh3" path="res://enemy/boss.tscn" id="7_boss"]
 [ext_resource type="PackedScene" path="res://menu/pause_menu.tscn" id="8_pause_menu"]
+[ext_resource type="Theme" path="res://menu/menu_theme.tres" id="13_menu_theme"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_chasis.png" id="9_icon_chasis"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_overdrive.png" id="10_icon_overdrive"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_shotgun.png" id="11_icon_shotgun"]
@@ -288,6 +289,96 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Menú principal"
 
+[node name="VictoryPanel" type="ColorRect" parent="UI" unique_id=1734021551]
+process_mode = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.02, 0.05, 0.8)
+
+[node name="VictoryTitle" type="Label" parent="UI/VictoryPanel" unique_id=1734021552]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -220.0
+offset_right = 500.0
+offset_bottom = -110.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.3, 0.35, 1)
+theme_override_constants/outline_size = 14
+theme_override_font_sizes/font_size = 84
+text = "¡VICTORIA!"
+horizontal_alignment = 1
+
+[node name="VictorySubtitle" type="Label" parent="UI/VictoryPanel" unique_id=1734021553]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -100.0
+offset_right = 500.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.6, 1)
+theme_override_font_sizes/font_size = 30
+text = "Derrotaste al Hivelord"
+horizontal_alignment = 1
+
+[node name="VictoryScoreLabel" type="Label" parent="UI/VictoryPanel" unique_id=1734021554]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 34
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="Buttons" type="VBoxContainer" parent="UI/VictoryPanel" unique_id=1734021555]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = 50.0
+offset_right = 180.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("13_menu_theme")
+theme_override_constants/separation = 18
+
+[node name="PlayAgainButton" type="Button" parent="UI/VictoryPanel/Buttons" unique_id=1734021556]
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+text = "JUGAR DE NUEVO"
+
+[node name="MenuButton" type="Button" parent="UI/VictoryPanel/Buttons" unique_id=1734021557]
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+text = "MENÚ PRINCIPAL"
+
 [node name="PauseMenu" parent="." unique_id=1460338281 instance=ExtResource("8_pause_menu")]
 
-[connection signal="pressed" from="UI/GameOverPanel/RetryButton" to="." method="_on_retry_button_pressed"]

@@ -12,9 +12,26 @@
 [ext_resource type="AudioStream" uid="uid://bubi7m4ljlqjk" path="res://player/chakong-laser-gun-shot-sound-future-sci-fi-lazer-wobble-chakongaudio-174883.mp3" id="9_8t03j"]
 [ext_resource type="AudioStream" uid="uid://ceo41rytm54lv" path="res://player/dying-minecraft.mp3" id="10_2ieo8"]
 [ext_resource type="Shader" path="res://player/damage_vignette.gdshader" id="11_vignette"]
+[ext_resource type="Script" path="res://player/weapon_hud.gd" id="12_weapon_hud"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("11_vignette")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weapon_hud"]
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 18.0
+content_margin_bottom = 8.0
+bg_color = Color(0.02, 0.03, 0.08, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.95, 0.9, 0.8)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_l1slb"]
 radius = 56.0
@@ -159,6 +176,51 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.9, 0, 0, 1)
+
+[node name="WeaponHud" type="PanelContainer" parent="CanvasLayer" unique_id=1093384221]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -110.0
+offset_right = 404.0
+offset_bottom = -24.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_hud")
+script = ExtResource("12_weapon_hud")
+
+[node name="Row" type="HBoxContainer" parent="CanvasLayer/WeaponHud" unique_id=1093384222]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 14
+
+[node name="Icon" type="TextureRect" parent="CanvasLayer/WeaponHud/Row" unique_id=1093384223]
+custom_minimum_size = Vector2(140, 56)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Texts" type="VBoxContainer" parent="CanvasLayer/WeaponHud/Row" unique_id=1093384224]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="NameLabel" type="Label" parent="CanvasLayer/WeaponHud/Row/Texts" unique_id=1093384225]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+text = "Repetidor de Plasma"
+
+[node name="HintLabel" type="Label" parent="CanvasLayer/WeaponHud/Row/Texts" unique_id=1093384226]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.75, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "Rueda del ratón: cambiar arma"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1184115478 groups=["arena_camera", "screen_shake"]]
 position_smoothing_enabled = true

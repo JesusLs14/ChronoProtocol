@@ -2,6 +2,7 @@ class_name Player
 extends CharacterBody2D
 
 signal health_changed(current_health: int, max_health: int)
+signal weapon_changed(weapon_id: String)
 
 @export var speed: float = 300.0
 @export var acceleration: float = 14.0
@@ -18,6 +19,8 @@ var current_weapon: String = "pistol"
 @export var dash_speed: float = 900.0
 @export var dash_duration: float = 0.18
 @export var dash_invulnerability_duration: float = 0.25
+## Tiempo sin recibir daño después de un golpe; el soldado parpadea mientras dura.
+@export var hurt_invulnerability_duration: float = 0.6
 @export var dash_cooldown: float = 0.8
 var core_fragments: int = 0
 # Al soltar las teclas la velocidad decae exponencialmente sin llegar a cero;
@@ -46,6 +49,8 @@ var _dash_direction := Vector2.ZERO
 var _dash_time_remaining: float = 0.0
 var _dash_cooldown_remaining: float = 0.0
 var _invulnerability_time_remaining: float = 0.0
+var _hurt_blink_remaining: float = 0.0
+const HURT_BLINK_INTERVAL: float = 0.08
 var _trail_time_remaining: float = 0.0
 
 
@@ -77,6 +82,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				unlocked_weapons.size()
 			)
 			current_weapon = unlocked_weapons[current_weapon_index]
+			weapon_changed.emit(current_weapon)
 			return
 
 	if event.is_action_pressed("shoot"):
@@ -119,6 +125,7 @@ func _physics_process(delta: float) -> void:
 
 	_dash_cooldown_remaining = maxf(0.0, _dash_cooldown_remaining - delta)
 	_invulnerability_time_remaining = maxf(0.0, _invulnerability_time_remaining - delta)
+	_update_hurt_blink(delta)
 	_aim_time_remaining = maxf(0.0, _aim_time_remaining - delta)
 
 	var input_direction: Vector2 = _get_move_direction()
@@ -172,6 +179,7 @@ func _start_dash(input_direction: Vector2) -> void:
 
 func _spawn_dash_trail() -> void:
 	var trail := anim_sprite.duplicate() as AnimatedSprite2D
+	trail.visible = true
 	trail.modulate = Color(0.35, 0.85, 1.0, 0.5)
 	trail.z_index = -1
 	trail.stop()
@@ -294,9 +302,13 @@ func take_damage() -> void:
 
 	if current_health > 0:
 		anim_sprite.play("hurt")
+		_invulnerability_time_remaining = maxf(_invulnerability_time_remaining, hurt_invulnerability_duration)
+		_hurt_blink_remaining = hurt_invulnerability_duration
 		return
 
 	is_dead = true
+	_hurt_blink_remaining = 0.0
+	anim_sprite.visible = true
 	_fire_held = false
 	velocity = Vector2.ZERO
 	_dash_time_remaining = 0.0
@@ -311,6 +323,17 @@ func take_damage() -> void:
 	main.show_game_over()
 
 
+# Parpadeo durante la invulnerabilidad que sigue a un golpe.
+func _update_hurt_blink(delta: float) -> void:
+	if _hurt_blink_remaining <= 0.0:
+		return
+	_hurt_blink_remaining = maxf(0.0, _hurt_blink_remaining - delta)
+	if _hurt_blink_remaining == 0.0:
+		anim_sprite.visible = true
+	else:
+		anim_sprite.visible = int(_hurt_blink_remaining / HURT_BLINK_INTERVAL) % 2 == 0
+
+
 # Destello rojo en los bordes de la pantalla al recibir daño.
 func _flash_damage_overlay() -> void:
 	if damage_overlay == null:
@@ -320,6 +343,15 @@ func _flash_damage_overlay() -> void:
 	damage_overlay.modulate.a = DAMAGE_OVERLAY_ALPHA
 	_damage_overlay_tween = create_tween()
 	_damage_overlay_tween.tween_property(damage_overlay, "modulate:a", 0.0, DAMAGE_OVERLAY_DURATION)
+
+
+# Añade un arma al inventario (si no la tenía) y la equipa.
+func equip_weapon(weapon_id: String) -> void:
+	if not unlocked_weapons.has(weapon_id):
+		unlocked_weapons.append(weapon_id)
+	current_weapon_index = unlocked_weapons.find(weapon_id)
+	current_weapon = weapon_id
+	weapon_changed.emit(current_weapon)
 
 
 func add_fragment(amount: int) -> void:
