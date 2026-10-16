@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dtke5anphqqi0"
-path="res://.godot/imported/players blue x1.png-d5e3ea8f30683b06bb434143594eeccf.ctex"
+uid="uid://ckywntbjc6jlt"
+path="res://.godot/imported/prota.png-84bb44c5c58fc9e69c4daffff75d2236.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://player/players blue x1.png"
-dest_files=["res://.godot/imported/players blue x1.png-d5e3ea8f30683b06bb434143594eeccf.ctex"]
+source_file="res://player/prota.png"
+dest_files=["res://.godot/imported/prota.png-84bb44c5c58fc9e69c4daffff75d2236.ctex"]
 
 [params]
 

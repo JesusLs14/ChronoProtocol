@@ -17,8 +17,15 @@ func _on_area_entered(area: Area2D) -> void:
 	if not area.is_in_group("enemy_hurtbox"):
 		return
 
-	var health_component: Variant = area.get_parent().get_node_or_null("HealthComponent")
-	if health_component == null or not health_component.take_damage():
+	var target := area.get_parent()
+	var damage_applied := false
+	if target.has_method("take_damage"):
+		damage_applied = target.take_damage()
+	else:
+		var health_component: Variant = target.get_node_or_null("HealthComponent")
+		if health_component != null:
+			damage_applied = health_component.take_damage()
+	if not damage_applied:
 		return
 
 	queue_free()

@@ -10,21 +10,28 @@ signal defeated
 @export_range(1.0, 3000.0, 1.0) var slam_speed: float = 900.0
 @export_range(0.1, 10.0, 0.1) var attack_interval_min: float = 3.0
 @export_range(0.1, 10.0, 0.1) var attack_interval_max: float = 4.0
+@export_range(0.1, 5.0, 0.1) var summon_attack_duration: float = 1.0
 @export var missile_scene: PackedScene
 @export var spider_scene: PackedScene
 
 var current_state: BossState = BossState.IDLE
+var is_enraged: bool = false
 var _slam_target: Vector2
 var _attack_time_remaining: float = 0.0
 var _laser_damage_cooldown: float = 0.0
+var _laser_charging: bool = false
 var _is_defeated: bool = false
 var _flash_tween: Tween
 
 @onready var laser_pivot: Node2D = $LaserPivot
+@onready var laser_line: Line2D = $LaserPivot/LaserLine
 @onready var laser_hitbox: Area2D = $LaserPivot/LaserHitbox
+@onready var laser_collision: CollisionShape2D = $LaserPivot/LaserHitbox/CollisionShape2D
 @onready var attack_timer: Timer = $AttackTimer
 @onready var health_component: HealthComponent = $HealthComponent
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var health_canvas: CanvasLayer = $CanvasLayer
+@onready var health_bar: ProgressBar = $CanvasLayer/BossHealthBar
 
 
 func _ready() -> void:
@@ -32,8 +39,11 @@ func _ready() -> void:
 	health_component.current_health = max_health
 	health_component.took_damage.connect(_on_health_took_damage)
 	health_component.died.connect(_on_health_died)
+	health_bar.max_value = max_health
+	health_bar.value = max_health
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
-	laser_pivot.hide()
+	sprite.play("idle")
+	_disable_laser()
 	laser_hitbox.body_entered.connect(_on_laser_body_entered)
 	_start_attack_timer()
 
@@ -45,25 +55,33 @@ func _physics_process(delta: float) -> void:
 	_laser_damage_cooldown = maxf(0.0, _laser_damage_cooldown - delta)
 	match current_state:
 		BossState.LASER:
-			laser_pivot.rotation += laser_speed * delta
-			_damage_laser_overlaps()
-			_attack_time_remaining -= delta
-			if _attack_time_remaining <= 0.0:
-				_return_to_idle()
+			if not _laser_charging:
+				var current_laser_speed := laser_speed * (1.3 if is_enraged else 1.0)
+				laser_pivot.rotation += current_laser_speed * delta
+				_damage_laser_overlaps()
+				_attack_time_remaining -= delta
+				if _attack_time_remaining <= 0.0:
+					_return_to_idle()
 		BossState.SLAM:
+			var current_slam_speed := slam_speed * (1.5 if is_enraged else 1.0)
 			var distance_to_target := global_position.distance_to(_slam_target)
-			if distance_to_target <= slam_speed * delta:
+			if distance_to_target <= current_slam_speed * delta:
 				global_position = _slam_target
 				velocity = Vector2.ZERO
 				_return_to_idle()
 			else:
-				velocity = global_position.direction_to(_slam_target) * slam_speed
+				velocity = global_position.direction_to(_slam_target) * current_slam_speed
 				move_and_slide()
 		_:
 			velocity = Vector2.ZERO
 
 
 func _start_attack_timer() -> void:
+	if is_enraged:
+		attack_timer.wait_time = 1.5
+		attack_timer.start()
+		return
+
 	attack_timer.wait_time = randf_range(
 		minf(attack_interval_min, attack_interval_max),
 		maxf(attack_interval_min, attack_interval_max)
@@ -100,21 +118,40 @@ func _on_attack_timer_timeout() -> void:
 
 func _start_laser(player: Node2D) -> void:
 	current_state = BossState.LASER
-	_attack_time_remaining = 3.0
+	_laser_charging = true
+	_attack_time_remaining = 0.0
 	_laser_damage_cooldown = 0.0
 	laser_pivot.global_rotation = global_position.direction_to(player.global_position).angle()
+	laser_line.width = 2.0
 	laser_pivot.show()
+	sprite.play("summon")
+	_charge_and_fire_laser()
+
+
+func _charge_and_fire_laser() -> void:
+	await get_tree().create_timer(0.5 if is_enraged else 1.0).timeout
+	if _is_defeated or current_state != BossState.LASER:
+		return
+
+	_laser_charging = false
+	laser_line.width = 30.0
+	laser_hitbox.monitoring = true
+	laser_collision.set_deferred("disabled", false)
+	$SfxLaser.play()
+	_attack_time_remaining = 3.0
 
 
 func _fire_missiles(player: Node2D) -> void:
 	current_state = BossState.MISSILES
+	sprite.play("summon")
 	if missile_scene == null:
 		push_error("Boss requires missile_scene for the MISSILES attack.")
 		_return_to_idle()
 		return
 
-	for index in range(3):
-		var spawn_offset := Vector2.RIGHT.rotated(TAU * float(index) / 3.0) * 90.0
+	var missile_count := 6 if is_enraged else 3
+	for index in range(missile_count):
+		var spawn_offset := Vector2.RIGHT.rotated(TAU * float(index) / missile_count) * 90.0
 		var missile := missile_scene.instantiate() as Node2D
 		if missile == null:
 			push_error("Boss missile_scene must have a Node2D root.")
@@ -122,17 +159,22 @@ func _fire_missiles(player: Node2D) -> void:
 		get_parent().add_child(missile)
 		missile.global_position = global_position + spawn_offset
 		missile.look_at(player.global_position)
+	await get_tree().create_timer(summon_attack_duration).timeout
+	if _is_defeated:
+		return
 	_return_to_idle()
 
 
 func _spawn_swarm() -> void:
 	current_state = BossState.SWARM
+	sprite.play("summon")
 	if spider_scene == null:
 		push_error("Boss requires spider_scene for the SWARM attack.")
 		_return_to_idle()
 		return
 
-	for _index in range(5):
+	var spider_count := 8 if is_enraged else 5
+	for _index in range(spider_count):
 		var spider := spider_scene.instantiate() as Node2D
 		if spider == null:
 			push_error("Boss spider_scene must have a Node2D root.")
@@ -142,12 +184,17 @@ func _spawn_swarm() -> void:
 			randf_range(-100.0, 100.0),
 			randf_range(-100.0, 100.0)
 		)
+	await get_tree().create_timer(summon_attack_duration).timeout
+	if _is_defeated:
+		return
 	_return_to_idle()
 
 
 func _start_slam(player: Node2D) -> void:
 	current_state = BossState.SLAM
 	_slam_target = player.global_position
+	sprite.play("embestida")
+	$SfxSlam.play()
 
 
 func _damage_laser_overlaps() -> void:
@@ -166,16 +213,37 @@ func _on_laser_body_entered(body: Node2D) -> void:
 
 
 func _return_to_idle() -> void:
-	if current_state == BossState.LASER:
-		laser_pivot.hide()
+	if _is_defeated:
+		return
+	_disable_laser()
 	velocity = Vector2.ZERO
 	current_state = BossState.IDLE
+	sprite.play("idle")
 	_start_attack_timer()
 
 
-func _on_health_took_damage(_current_health: int, _damage_amount: int) -> void:
+func _disable_laser() -> void:
+	_laser_charging = false
+	laser_hitbox.monitoring = false
+	laser_collision.set_deferred("disabled", true)
+	laser_line.width = 2.0
+	laser_pivot.hide()
+
+
+func take_damage(damage_amount: int = 1) -> bool:
+	var damage_applied := health_component.take_damage(damage_amount)
+	if damage_applied:
+		health_bar.value = health_component.current_health
+		_update_enrage_state(health_component.current_health)
+		$SfxHit.play()
+	return damage_applied
+
+
+func _on_health_took_damage(current_health: int, _damage_amount: int) -> void:
 	if _is_defeated:
 		return
+	health_bar.value = current_health
+	_update_enrage_state(current_health)
 	if _flash_tween != null and _flash_tween.is_running():
 		_flash_tween.kill()
 	sprite.modulate = Color(2.0, 2.0, 2.0, 1.0)
@@ -183,11 +251,23 @@ func _on_health_took_damage(_current_health: int, _damage_amount: int) -> void:
 	_flash_tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
 
 
+func _update_enrage_state(current_health: int) -> void:
+	if not is_enraged and current_health * 2 < max_health:
+		is_enraged = true
+
+
 func _on_health_died() -> void:
+	if _is_defeated:
+		return
 	_is_defeated = true
 	attack_timer.stop()
-	laser_pivot.hide()
+	health_canvas.hide()
+	_disable_laser()
+	velocity = Vector2.ZERO
+	current_state = BossState.IDLE
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Hurtbox/CollisionShape2D.set_deferred("disabled", true)
+	sprite.play("death")
+	await sprite.animation_finished
 	defeated.emit()
 	queue_free()

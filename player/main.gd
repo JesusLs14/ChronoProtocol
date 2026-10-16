@@ -4,7 +4,7 @@ signal wave_ended
 
 const SHOP_TRANSITION_DELAY: float = 2.5
 const KILLS_PER_WAVE: Array[int] = [15, 20, 30, 50, 60]
-const SHOP_COSTS: Array[int] = [5, 8, 10, 12, 15]
+const SHOP_COSTS: Array[int] = [5, 8, 10, 12]
 
 @export var enemy_scene: PackedScene
 @export var minion_scene: PackedScene
@@ -35,7 +35,7 @@ func _ready() -> void:
 	$UI/ShopPanel/ShopTabs/Clínica/OverdriveButton.pressed.connect(_on_shop_purchase_pressed.bind(1))
 	$UI/ShopPanel/ShopTabs/Clínica/ExtraBatteryButton.pressed.connect(_on_shop_purchase_pressed.bind(2))
 	$UI/ShopPanel/ShopTabs/Armería/ShotgunButton.pressed.connect(_on_shop_purchase_pressed.bind(3))
-	$UI/ShopPanel/ShopTabs/Armería/GrenadeLauncherButton.pressed.connect(_on_shop_purchase_pressed.bind(4))
+	$UI/ShopPanel/ShopTabs/Armería/GrenadeLauncherButton.hide()
 	$UI/ShopPanel/ContinueButton.pressed.connect(_on_continue_pressed)
 	wave_ended.connect(_on_wave_ended)
 	enemies_to_kill = KILLS_PER_WAVE[current_wave - 1]
@@ -128,10 +128,6 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 	if option_index == 3 and player.has_shotgun:
 		shop_status_label.text = "Ya tienes la Escopeta"
 		return
-	if option_index == 4 and player.has_grenade_launcher:
-		shop_status_label.text = "Ya tienes el Lanzagranadas"
-		return
-
 	var cost := SHOP_COSTS[option_index]
 	if player.core_fragments < cost:
 		shop_status_label.text = "No tienes suficientes Fragmentos de Núcleo"
@@ -157,11 +153,6 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 			player.current_weapon = "shotgun"
 			print("Escopeta comprada")
 			shop_status_label.text = "Escopeta añadida al inventario"
-		4:
-			player.has_grenade_launcher = true
-			print("Lanzagranadas comprado")
-			shop_status_label.text = "Lanzagranadas añadido al inventario"
-
 	shop_fragments_label.text = "Core Fragments: %d" % player.core_fragments
 
 

@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cpl4drd4ppnot"]
+
+[ext_resource type="AudioStream" uid="uid://of1es3n2j6b4" path="res://player/Karl Casey - Kiss in the Dark.ogg" id="1_rmqje"]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" unique_id=438709380]
+stream = ExtResource("1_rmqje")
+autoplay = true

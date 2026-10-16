@@ -7,6 +7,8 @@ const MAX_WEAPON_SLOTS: int = 4
 @export var initial_weapon: WeaponData
 
 var _player: Node2D
+var _weapon_pivot: Node2D
+var _muzzle: Marker2D
 var _active_weapons: Array[WeaponData] = []
 var _fire_cooldowns: Array[float] = []
 
@@ -15,6 +17,11 @@ func _ready() -> void:
 	_player = get_node_or_null(player_path) as Node2D
 	if _player == null:
 		push_error("WeaponManager requires a Node2D at player_path.")
+		return
+	_weapon_pivot = _player.get_node_or_null("WeaponPivot") as Node2D
+	_muzzle = _player.get_node_or_null("WeaponPivot/Muzzle") as Marker2D
+	if _weapon_pivot == null or _muzzle == null:
+		push_error("WeaponManager requires WeaponPivot and its Marker2D child Muzzle.")
 		return
 	if initial_weapon == null:
 		push_error("WeaponManager requires an initial_weapon.")
@@ -80,7 +87,6 @@ func fire_at(
 
 		for projectile_index in range(projectile_count):
 			var spread_offset := first_angle + angle_step * projectile_index
-			var projectile_direction := aim_direction.rotated(spread_offset)
 			var projectile := weapon.projectile_scene.instantiate() as Node2D
 			if projectile == null:
 				push_error(
@@ -90,8 +96,8 @@ func fire_at(
 				continue
 
 			_player.get_parent().add_child(projectile)
-			projectile.global_position = _player.global_position
-			projectile.global_rotation = projectile_direction.angle()
+			projectile.global_position = _muzzle.global_position
+			projectile.global_rotation = _weapon_pivot.global_rotation + spread_offset
 
 		if weapon_fired:
 			_fire_cooldowns[index] = maxf(weapon.fire_interval, minimum_fire_interval)

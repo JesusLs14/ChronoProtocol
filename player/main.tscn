@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://dk1t63wcu4v7h" path="res://player/main.gd" id="3_main"]
 [ext_resource type="PackedScene" uid="uid://qc6tqqo1l2dg" path="res://enemy/spider_minion.tscn" id="5_minion"]
 [ext_resource type="PackedScene" path="res://player/arena.tscn" id="6_arena_scene"]
-[ext_resource type="PackedScene" path="res://enemy/boss.tscn" id="7_boss"]
+[ext_resource type="PackedScene" uid="uid://cy7md8e3ahvh3" path="res://enemy/boss.tscn" id="7_boss"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shop"]
 bg_color = Color(0.02, 0.03, 0.08, 0.94)

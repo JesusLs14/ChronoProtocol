@@ -1,14 +1,190 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cy7md8e3ahvh3"]
 
-[ext_resource type="Script" path="res://enemy/boss.gd" id="1_boss"]
-[ext_resource type="Texture2D" path="res://player/hivelord.jpg" id="2_hivelord"]
-[ext_resource type="Shader" path="res://enemy/boss_sprite_key.gdshader" id="3_key"]
-[ext_resource type="Script" path="res://enemy/health_component.gd" id="4_health"]
-[ext_resource type="PackedScene" path="res://enemy/enemy_bullet.tscn" id="5_missile"]
-[ext_resource type="PackedScene" path="res://enemy/spider_minion.tscn" id="6_spider"]
+[ext_resource type="Script" uid="uid://cxibyife537nq" path="res://enemy/boss.gd" id="1_boss"]
+[ext_resource type="Script" uid="uid://dcdgo6gybf0vd" path="res://enemy/health_component.gd" id="4_health"]
+[ext_resource type="Texture2D" uid="uid://30vg7hybmhmm" path="res://enemy/hivelord.png" id="4_svpuv"]
+[ext_resource type="PackedScene" uid="uid://bklr375qr2724" path="res://enemy/enemy_bullet.tscn" id="5_missile"]
+[ext_resource type="AudioStream" uid="uid://cibb6cx0dr1bg" path="res://enemy/freesound_community-bullet-hit-metal-84818.mp3" id="6_5r480"]
+[ext_resource type="PackedScene" uid="uid://qc6tqqo1l2dg" path="res://enemy/spider_minion.tscn" id="6_spider"]
+[ext_resource type="AudioStream" uid="uid://cwpe7w2hpegc5" path="res://enemy/freesound_community-laser-weld-103309.mp3" id="7_hkla4"]
+[ext_resource type="AudioStream" uid="uid://cajleicd1qdeb" path="res://enemy/soundreality-metal-door-slam-172172.mp3" id="8_icm5i"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_key"]
-shader = ExtResource("3_key")
+[sub_resource type="AtlasTexture" id="AtlasTexture_n3pxx"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(0, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oqtpg"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(81, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5r480"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(162, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hkla4"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(243, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_icm5i"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(324, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5683"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(405, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_178tv"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(486, 237, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qwq0o"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(0, 79, 85, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5aalv"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(85, 79, 85, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wi71j"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(170, 79, 85, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5i64x"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(255, 79, 85, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yejys"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(340, 79, 85, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spyao"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(0, 0, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_og45l"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(81, 0, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n668i"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(162, 0, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ar228"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(243, 0, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_01fg4"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(0, 158, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3mv6w"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(81, 158, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ehu3s"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(162, 158, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4b5a"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(243, 158, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c00ts"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(324, 158, 81, 79)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1nvie"]
+atlas = ExtResource("4_svpuv")
+region = Rect2(405, 158, 81, 79)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_70xmx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n3pxx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oqtpg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5r480")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hkla4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_icm5i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5683")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_178tv")
+}],
+"loop": 1,
+"name": &"death",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qwq0o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5aalv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wi71j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5i64x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yejys")
+}],
+"loop": 1,
+"name": &"embestida",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spyao")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_og45l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n668i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ar228")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_01fg4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3mv6w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ehu3s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4b5a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c00ts")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1nvie")
+}],
+"loop": 1,
+"name": &"summon",
+"speed": 10.0
+}]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 72.0
@@ -19,50 +195,79 @@ radius = 88.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_laser"]
 size = Vector2(1000, 24)
 
-[node name="Boss" type="CharacterBody2D" groups=["enemy"]]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b270l"]
+bg_color = Color(0.45953077, 0, 0.061810456, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l1slb"]
+bg_color = Color(1, 0.16470589, 0.078431375, 1)
+
+[node name="Boss" type="CharacterBody2D" unique_id=1717222052 groups=["enemy"]]
 collision_layer = 2
-collision_mask = 1
 script = ExtResource("1_boss")
 missile_scene = ExtResource("5_missile")
 spider_scene = ExtResource("6_spider")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-material = SubResource("ShaderMaterial_key")
-position = Vector2(0, -8)
-scale = Vector2(0.55, 0.55)
-texture = ExtResource("2_hivelord")
-region_enabled = true
-region_rect = Rect2(0, 0, 512, 512)
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=812514430]
+position = Vector2(-12, 0)
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_70xmx")
+animation = &"death"
+autoplay = "idle"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1742964590]
 shape = SubResource("CircleShape2D_body")
 
-[node name="Hurtbox" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1740016894 groups=["enemy_hurtbox"]]
 collision_layer = 2
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=2095116469]
 shape = SubResource("CircleShape2D_hurtbox")
+metadata/_edit_lock_ = true
 
-[node name="HealthComponent" type="Node" parent="."]
+[node name="HealthComponent" type="Node" parent="." unique_id=1138888851]
 script = ExtResource("4_health")
 max_health = 500
 
-[node name="AttackTimer" type="Timer" parent="."]
+[node name="AttackTimer" type="Timer" parent="." unique_id=290351600]
 one_shot = true
 
-[node name="LaserPivot" type="Node2D" parent="."]
+[node name="LaserPivot" type="Node2D" parent="." unique_id=757238752]
 visible = false
 
-[node name="LaserLine" type="Line2D" parent="LaserPivot"]
+[node name="LaserLine" type="Line2D" parent="LaserPivot" unique_id=614253384]
 points = PackedVector2Array(0, 0, 1000, 0)
 width = 12.0
 default_color = Color(0.1, 1, 1, 0.9)
 
-[node name="LaserHitbox" type="Area2D" parent="LaserPivot"]
+[node name="LaserHitbox" type="Area2D" parent="LaserPivot" unique_id=582888990]
 collision_layer = 0
-collision_mask = 1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LaserPivot/LaserHitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LaserPivot/LaserHitbox" unique_id=1243068647]
 position = Vector2(500, 0)
 shape = SubResource("RectangleShape2D_laser")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=808074647]
+
+[node name="BossHealthBar" type="ProgressBar" parent="CanvasLayer" unique_id=1077924079]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -2.0
+offset_right = 2.0
+offset_bottom = 27.0
+grow_horizontal = 2
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.8156863, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 0.16470589, 0.078431375, 1)
+theme_override_styles/background = SubResource("StyleBoxFlat_b270l")
+theme_override_styles/fill = SubResource("StyleBoxFlat_l1slb")
+
+[node name="SfxHit" type="AudioStreamPlayer2D" parent="." unique_id=652240348]
+stream = ExtResource("6_5r480")
+
+[node name="SfxSlam" type="AudioStreamPlayer2D" parent="." unique_id=1244148098]
+stream = ExtResource("7_hkla4")
+
+[node name="SfxLaser" type="AudioStreamPlayer2D" parent="." unique_id=13567370]
+stream = ExtResource("8_icm5i")

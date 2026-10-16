@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://of1es3n2j6b4"
+path="res://.godot/imported/Karl Casey - Kiss in the Dark.ogg-843658b127dccd4464873c052781531a.oggvorbisstr"
+
+[deps]
+
+source_file="res://player/Karl Casey - Kiss in the Dark.ogg"
+dest_files=["res://.godot/imported/Karl Casey - Kiss in the Dark.ogg-843658b127dccd4464873c052781531a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5fj1lejqqct1"
-path="res://.godot/imported/players blue x3.png-d92f0773343756a545d35a85215b933b.ctex"
+uid="uid://30vg7hybmhmm"
+path="res://.godot/imported/hivelord.png-b5fd096b84547c3c3700431c7df83aed.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://player/players blue x3.png"
-dest_files=["res://.godot/imported/players blue x3.png-d92f0773343756a545d35a85215b933b.ctex"]
+source_file="res://enemy/hivelord.png"
+dest_files=["res://.godot/imported/hivelord.png-b5fd096b84547c3c3700431c7df83aed.ctex"]
 
 [params]
 

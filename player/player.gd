@@ -8,8 +8,8 @@ signal health_changed(current_health: int, max_health: int)
 @export var friction: float = 12.0
 @export var max_health: int = 10
 var current_health: int = 10
+var is_dead: bool = false
 var has_shotgun: bool = false
-var has_grenade_launcher: bool = false
 var unlocked_weapons: Array[String] = ["pistol"]
 var current_weapon_index: int = 0
 var current_weapon: String = "pistol"
@@ -21,6 +21,7 @@ var core_fragments: int = 0
 @onready var anim_sprite = $AnimatedSprite2D
 @onready var hit_flash: HitFlashComponent = $HitFlashComponent
 @onready var weapon_manager: WeaponManager = $WeaponManager
+@onready var weapon_pivot: Node2D = $WeaponPivot
 
 var _dash_direction := Vector2.ZERO
 var _dash_time_remaining: float = 0.0
@@ -37,6 +38,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_dead:
+		return
+
 	if event is InputEventMouseButton and event.pressed:
 		var direction := 0
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -58,18 +62,30 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("shoot"):
 		return
 
-	var fired := false
+	var fired: bool
+	var aim_position := _get_aim_position()
 	if current_weapon == "shotgun":
-		fired = weapon_manager.fire_at(get_global_mouse_position(), 5, 45.0, 0.8)
+		fired = weapon_manager.fire_at(aim_position, 5, 45.0, 0.8)
 	else:
-		fired = weapon_manager.fire_at(get_global_mouse_position())
+		fired = weapon_manager.fire_at(aim_position)
 	if fired:
 		anim_sprite.play("shoot")
+		$SfxShoot.play()
 
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
+
 	_dash_cooldown_remaining = maxf(0.0, _dash_cooldown_remaining - delta)
 	_invulnerability_time_remaining = maxf(0.0, _invulnerability_time_remaining - delta)
+	var aim_vector := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	var aim_position := get_global_mouse_position()
+	if aim_vector.length() > 0.2:
+		aim_position = global_position + aim_vector
+		look_at(aim_position)
+	anim_sprite.flip_h = aim_position.x < global_position.x
+	weapon_pivot.look_at(aim_position)
 
 	var input_direction: Vector2 = _get_move_direction()
 	if Input.is_action_just_pressed("dash") and _dash_cooldown_remaining == 0.0:
@@ -85,7 +101,6 @@ func _physics_process(delta: float) -> void:
 			_trail_time_remaining = 0.04
 		if _dash_time_remaining == 0.0:
 			velocity = _dash_direction * speed
-		_update_animation()
 		return
 
 	var weight: float
@@ -113,6 +128,7 @@ func _start_dash(input_direction: Vector2) -> void:
 	_dash_cooldown_remaining = dash_cooldown
 	_invulnerability_time_remaining = dash_invulnerability_duration
 	_trail_time_remaining = 0.0
+	anim_sprite.play("dash")
 
 
 func _spawn_dash_trail() -> void:
@@ -128,9 +144,11 @@ func _spawn_dash_trail() -> void:
 
 
 func _update_animation() -> void:
-	var facing_target := get_global_mouse_position()
-	anim_sprite.flip_h = facing_target.x < global_position.x
-	if anim_sprite.animation == "shoot" and anim_sprite.is_playing():
+	if (
+		is_dead
+		or _dash_time_remaining > 0.0
+		or (anim_sprite.animation == "shoot" and anim_sprite.is_playing())
+	):
 		return
 
 	if velocity.length() > 0:
@@ -140,21 +158,32 @@ func _update_animation() -> void:
 
 
 func _get_move_direction() -> Vector2:
-	var direction := Vector2(
+	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var keyboard_direction := Vector2(
 		Input.get_axis("ui_left", "ui_right"),
 		Input.get_axis("ui_up", "ui_down")
 	)
 
 	if Input.is_physical_key_pressed(KEY_D):
-		direction.x += 1.0
+		keyboard_direction.x += 1.0
 	if Input.is_physical_key_pressed(KEY_A):
-		direction.x -= 1.0
+		keyboard_direction.x -= 1.0
 	if Input.is_physical_key_pressed(KEY_S):
-		direction.y += 1.0
+		keyboard_direction.y += 1.0
 	if Input.is_physical_key_pressed(KEY_W):
-		direction.y -= 1.0
+		keyboard_direction.y -= 1.0
 
-	return direction.normalized()
+	if keyboard_direction != Vector2.ZERO:
+		direction = (direction + keyboard_direction).normalized()
+
+	return direction
+
+
+func _get_aim_position() -> Vector2:
+	var aim_vector := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	if aim_vector.length() > 0.2:
+		return global_position + aim_vector
+	return get_global_mouse_position()
 
 
 func take_damage() -> void:
@@ -162,16 +191,26 @@ func take_damage() -> void:
 		return
 
 	current_health = maxi(0, current_health - 1)
+	$SfxHit.play()
 	health_changed.emit(current_health, max_health)
+	if current_health <= 0:
+		is_dead = true
+		velocity = Vector2.ZERO
+		_dash_time_remaining = 0.0
+		anim_sprite.play("death")
+		await anim_sprite.animation_finished
+
+		var main = get_tree().get_first_node_in_group("main")
+		if main == null:
+			push_error("Cannot show game over: no main node exists in the main group.")
+			return
+		main.show_game_over()
+		return
+
 	hit_flash.flash()
 	var screen_shake := get_tree().get_first_node_in_group("screen_shake")
 	if screen_shake != null:
 		screen_shake.shake()
-	if current_health <= 0:
-		var main = get_tree().get_first_node_in_group("main")
-		if main:
-			main.show_game_over()
-
 
 func add_fragment(amount: int) -> void:
 	if amount <= 0:
