@@ -1,13 +1,18 @@
 [gd_scene format=3 uid="uid://b2pn66oqcjjli"]
 
 [ext_resource type="PackedScene" uid="uid://b6c0lujcgvfw2" path="res://player/player.tscn" id="1_37jte"]
-[ext_resource type="PackedScene" uid="uid://cppxkthkkqly7" path="res://enemy/enemy.tscn" id="2_enemy"]
 [ext_resource type="Script" uid="uid://dk1t63wcu4v7h" path="res://player/main.gd" id="3_main"]
-[ext_resource type="PackedScene" uid="uid://qc6tqqo1l2dg" path="res://enemy/spider_minion.tscn" id="5_minion"]
 [ext_resource type="PackedScene" path="res://player/arena.tscn" id="6_arena_scene"]
 [ext_resource type="PackedScene" uid="uid://cy7md8e3ahvh3" path="res://enemy/boss.tscn" id="7_boss"]
 [ext_resource type="PackedScene" path="res://menu/pause_menu.tscn" id="8_pause_menu"]
 [ext_resource type="Theme" path="res://menu/menu_theme.tres" id="13_menu_theme"]
+[ext_resource type="Script" path="res://player/wave_director.gd" id="15_wave_director"]
+[ext_resource type="Script" path="res://player/wave_banner.gd" id="16_wave_banner"]
+[ext_resource type="Resource" path="res://enemy/variants/spider.tres" id="17_spider"]
+[ext_resource type="Resource" path="res://enemy/variants/fast_spider.tres" id="18_fast_spider"]
+[ext_resource type="Resource" path="res://enemy/variants/armored_spider.tres" id="19_armored_spider"]
+[ext_resource type="Resource" path="res://enemy/variants/drone.tres" id="20_drone"]
+[ext_resource type="Resource" path="res://enemy/variants/gunner_drone.tres" id="21_gunner_drone"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_chasis.png" id="9_icon_chasis"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_overdrive.png" id="10_icon_overdrive"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_shotgun.png" id="11_icon_shotgun"]
@@ -28,25 +33,32 @@ corner_radius_bottom_left = 12
 
 [node name="Main" type="Node2D" unique_id=1772718772 groups=["main"]]
 script = ExtResource("3_main")
-enemy_scene = ExtResource("2_enemy")
-minion_scene = ExtResource("5_minion")
 boss_scene = ExtResource("7_boss")
+
+[node name="WaveDirector" type="Node" parent="." unique_id=1650422001]
+script = ExtResource("15_wave_director")
+spider = ExtResource("17_spider")
+fast_spider = ExtResource("18_fast_spider")
+armored_spider = ExtResource("19_armored_spider")
+drone = ExtResource("20_drone")
+gunner_drone = ExtResource("21_gunner_drone")
 
 [node name="Arena" parent="." unique_id=810724060 instance=ExtResource("6_arena_scene")]
 
 [node name="player" parent="." unique_id=17430760 instance=ExtResource("1_37jte")]
 position = Vector2(1600, 1120)
 
-[node name="Enemy" parent="." unique_id=752532056 instance=ExtResource("2_enemy")]
-position = Vector2(1750, 1120)
-
 [node name="UI" type="CanvasLayer" parent="." unique_id=1905504378]
 
 [node name="ScoreLabel" type="Label" parent="UI" unique_id=1542941090]
-offset_left = 13.0
+offset_left = 16.0
 offset_top = 8.0
-offset_right = 77.0
-offset_bottom = 31.0
+offset_right = 420.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.85, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
 text = "SCORE 0"
 
 [node name="WaveTimeLabel" type="Label" parent="UI" unique_id=412783599]
@@ -201,6 +213,37 @@ offset_right = 440.0
 offset_bottom = 373.0
 text = "Salir y Continuar"
 
+[node name="WaveBanner" type="VBoxContainer" parent="UI" unique_id=1650422002]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -600.0
+offset_top = 190.0
+offset_right = 600.0
+offset_bottom = 330.0
+grow_horizontal = 2
+mouse_filter = 2
+alignment = 1
+script = ExtResource("16_wave_banner")
+
+[node name="TitleLabel" type="Label" parent="UI/WaveBanner" unique_id=1650422003]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.25, 0.1, 0, 1)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 64
+text = "OLEADA 1"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="UI/WaveBanner" unique_id=1650422004]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 28
+text = "Nuevos enemigos"
+horizontal_alignment = 1
+
 [node name="BossWarningLabel" type="Label" parent="UI" unique_id=2001139628]
 visible = false
 anchors_preset = 8
@@ -338,7 +381,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.55, 0.6, 1)
 theme_override_font_sizes/font_size = 30
-text = "Derrotaste al Hivelord"
+text = "Derrotaste al Hivelord. ¿Aguantas más?"
 horizontal_alignment = 1
 
 [node name="VictoryScoreLabel" type="Label" parent="UI/VictoryPanel" unique_id=1734021554]
@@ -365,14 +408,19 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = 50.0
-offset_right = 180.0
-offset_bottom = 210.0
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 290.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("13_menu_theme")
 theme_override_constants/separation = 18
+
+[node name="EndlessButton" type="Button" parent="UI/VictoryPanel/Buttons" unique_id=1650422005]
+custom_minimum_size = Vector2(0, 66)
+layout_mode = 2
+text = "MODO INFINITO"
 
 [node name="PlayAgainButton" type="Button" parent="UI/VictoryPanel/Buttons" unique_id=1734021556]
 custom_minimum_size = Vector2(0, 66)

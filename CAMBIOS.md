@@ -36,5 +36,16 @@
 - **Sonidos nuevos** (`sfx/`, generados con `generate_sfx.py`): explosión de la granada, clic y sonido al pasar por cualquier botón, y campanita al recoger fragmentos. Los reproduce el autoload `Sfx` (`sfx/sfx.gd`), que conecta solo todos los botones del juego y evita que el imán de fragmentos sature el sonido.
 - **Icono de Batería Extra** (`player/shop_icons/icon_battery.png`, dibujado con `draw_battery_icon.py`): batería con celdas cian y un "+" verde.
 
+## Quinta ronda: historia, enemigos por oleada y modo infinito
+- **Intro** (`menu/intro.tscn`, `menu/intro.gd`): transmisión de propaganda del Mando Chronos, al estilo de Helldivers 2, en 7 escenas: el Protocolo Chronos, la Colmena, el Hivelord, el Soldado Chronos y la misión. Texto que se escribe solo, titulares animados, líneas de pantalla vieja y los sprites del juego en escena. Sale al pulsar Jugar; clic o Espacio avanza y Esc la salta.
+- **Enemigos distintos por oleada** (`enemy/enemy_variant.gd`, `enemy/variants/`, `player/wave_director.gd`): 5 tipos a partir de la araña y el dron, con otro color, tamaño y estadísticas:
+  - Araña (1 vida), Araña veloz (más rápida y pequeña), Araña acorazada (4 de vida, lenta, grande);
+  - Dron (3 de vida), Dron artillero (5 de vida, dispara casi el doble de rápido).
+  - Oleada 1: arañas. Oleada 2: arañas y drones. Oleada 3: entra la araña veloz. Oleada 4: acorazadas y artilleros. Oleada 5: el jefe.
+  - Al empezar cada oleada aparece un aviso con los enemigos nuevos (`player/wave_banner.gd`). Cada tipo da distinto puntaje y los más duros sueltan un fragmento extra.
+- **Modo infinito:** la pantalla de victoria tiene el botón "MODO INFINITO". Las oleadas siguen con mezcla de todos los enemigos, más vida y aparición más rápida; el jefe vuelve cada 5 oleadas con 50 % más de vida cada vez, y la tienda sale después de cada oleada. El HUD muestra "∞ WAVE n".
+- El puntaje ahora se ve más grande y conserva la palabra "SCORE". Las arañas que invoca el jefe ya no cuentan para terminar la oleada (antes podían acabarla en medio de la pelea).
+- Se quitó el dron que aparecía fijo junto al jugador al empezar, porque la oleada 1 es solo de arañas.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var speed: float = 220.0
 @export var fragment_scene: PackedScene
 @export_range(1, 100, 1) var fragment_drop_amount: int = 1
+@export_range(1, 1000, 1) var score_points: int = 10
 @export_range(0.1, 5.0, 0.1) var attack_interval: float = 0.8
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -81,7 +82,7 @@ func _on_health_died() -> void:
 	_spawn_fragment()
 	var main := get_tree().get_first_node_in_group("main")
 	if main != null:
-		main.register_enemy_kill()
+		main.register_enemy_kill(score_points)
 	sprite.play(&"Death")
 
 

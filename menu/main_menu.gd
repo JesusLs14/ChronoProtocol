@@ -1,9 +1,9 @@
 extends Control
 
-## Menú principal: Jugar abre la arena, Controles muestra las teclas y Salir
+## Menú principal: Jugar abre la intro (y después la arena), Controles muestra las teclas y Salir
 ## cierra el juego.
 
-@export_file("*.tscn") var game_scene_path: String = "res://player/main.tscn"
+@export_file("*.tscn") var game_scene_path: String = "res://menu/intro.tscn"
 
 @onready var buttons: VBoxContainer = $Buttons
 @onready var play_button: Button = $Buttons/PlayButton

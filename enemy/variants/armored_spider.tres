@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyVariant" format=3]
+
+[ext_resource type="Script" path="res://enemy/enemy_variant.gd" id="1_variant"]
+[ext_resource type="PackedScene" path="res://enemy/spider_minion.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_variant")
+display_name = "Araña acorazada"
+scene = ExtResource("2_scene")
+health = 4
+speed_multiplier = 0.75
+size_multiplier = 1.35
+tint = Color(0.55, 0.75, 1, 1)
+bonus_fragments = 1
+score_points = 25
