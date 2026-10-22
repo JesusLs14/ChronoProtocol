@@ -8,6 +8,8 @@ const MAX_WEAPON_SLOTS: int = 4
 ## Punto opcional desde el que salen los proyectiles (p. ej. la boca del arma).
 @export var muzzle_path: NodePath = ^"../Muzzle"
 
+## Multiplica la cadencia de todas las armas (p. ej. la sobrecarga de racha).
+var fire_rate_multiplier: float = 1.0
 var _player: Node2D
 var _muzzle: Node2D
 var _active_weapons: Array[WeaponData] = []
@@ -31,9 +33,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	for index in range(_fire_cooldowns.size()):
-		_fire_cooldowns[index] = maxf(0.0, _fire_cooldowns[index] - delta)
+		_fire_cooldowns[index] = maxf(0.0, _fire_cooldowns[index] - delta * fire_rate_multiplier)
 	for weapon: WeaponData in _separate_cooldowns:
-		_separate_cooldowns[weapon] = maxf(0.0, _separate_cooldowns[weapon] - delta)
+		_separate_cooldowns[weapon] = maxf(0.0, _separate_cooldowns[weapon] - delta * fire_rate_multiplier)
 
 
 func add_weapon(weapon: WeaponData) -> bool:

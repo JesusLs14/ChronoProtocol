@@ -13,6 +13,8 @@
 [ext_resource type="Resource" path="res://enemy/variants/armored_spider.tres" id="19_armored_spider"]
 [ext_resource type="Resource" path="res://enemy/variants/drone.tres" id="20_drone"]
 [ext_resource type="Resource" path="res://enemy/variants/gunner_drone.tres" id="21_gunner_drone"]
+[ext_resource type="Script" path="res://player/kill_streak.gd" id="22_kill_streak"]
+[ext_resource type="Script" path="res://player/kill_streak_hud.gd" id="23_streak_hud"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_chasis.png" id="9_icon_chasis"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_overdrive.png" id="10_icon_overdrive"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_shotgun.png" id="11_icon_shotgun"]
@@ -31,6 +33,12 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_streak_bg"]
+bg_color = Color(0, 0, 0, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_streak_fill"]
+bg_color = Color(1, 0.8, 0.25, 1)
+
 [node name="Main" type="Node2D" unique_id=1772718772 groups=["main"]]
 script = ExtResource("3_main")
 boss_scene = ExtResource("7_boss")
@@ -42,6 +50,9 @@ fast_spider = ExtResource("18_fast_spider")
 armored_spider = ExtResource("19_armored_spider")
 drone = ExtResource("20_drone")
 gunner_drone = ExtResource("21_gunner_drone")
+
+[node name="KillStreak" type="Node" parent="." unique_id=1765330000]
+script = ExtResource("22_kill_streak")
 
 [node name="Arena" parent="." unique_id=810724060 instance=ExtResource("6_arena_scene")]
 
@@ -62,11 +73,13 @@ theme_override_font_sizes/font_size = 30
 text = "SCORE 0"
 
 [node name="WaveTimeLabel" type="Label" parent="UI" unique_id=412783599]
-offset_left = 13.0
-offset_top = 34.0
-offset_right = 180.0
-offset_bottom = 58.0
-theme_override_font_sizes/font_size = 20
+offset_left = 16.0
+offset_top = 52.0
+offset_right = 520.0
+offset_bottom = 82.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
 text = "WAVE 1  |  KILLS 0/15"
 
 [node name="ShopPanel" type="ColorRect" parent="UI" unique_id=412783600]
@@ -242,6 +255,103 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 28
 text = "Nuevos enemigos"
+horizontal_alignment = 1
+
+[node name="KillStreakHud" type="Control" parent="UI" unique_id=1765330001]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("23_streak_hud")
+
+[node name="Counter" type="VBoxContainer" parent="UI/KillStreakHud" unique_id=1765330002]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -170.0
+offset_right = -40.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="CountLabel" type="Label" parent="UI/KillStreakHud/Counter" unique_id=1765330003]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 14
+theme_override_font_sizes/font_size = 86
+text = "x0"
+horizontal_alignment = 2
+
+[node name="NameLabel" type="Label" parent="UI/KillStreakHud/Counter" unique_id=1765330004]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 28
+text = "RACHA"
+horizontal_alignment = 2
+
+[node name="TimeBar" type="ProgressBar" parent="UI/KillStreakHud/Counter" unique_id=1765330005]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_streak_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_streak_fill")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="NextLabel" type="Label" parent="UI/KillStreakHud/Counter" unique_id=1765330006]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 0.85)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "Próxima: ESCUDO a las 20"
+horizontal_alignment = 2
+
+[node name="Reward" type="VBoxContainer" parent="UI/KillStreakHud" unique_id=1765330007]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -500.0
+offset_top = -380.0
+offset_right = 500.0
+offset_bottom = -250.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="UI/KillStreakHud/Reward" unique_id=1765330008]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 1, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0.15, 0.2, 1)
+theme_override_constants/outline_size = 14
+theme_override_font_sizes/font_size = 60
+text = "¡ESCUDO!"
+horizontal_alignment = 1
+
+[node name="TextLabel" type="Label" parent="UI/KillStreakHud/Reward" unique_id=1765330009]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 26
+text = "Bloquea los próximos 2 golpes"
 horizontal_alignment = 1
 
 [node name="BossWarningLabel" type="Label" parent="UI" unique_id=2001139628]

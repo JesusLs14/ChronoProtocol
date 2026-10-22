@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Musica="*uid://cpl4drd4ppnot"
 Sfx="*res://sfx/sfx.gd"
+WindowControls="*res://menu/window_controls.gd"
 
 [display]
 

@@ -13,6 +13,7 @@
 [ext_resource type="AudioStream" uid="uid://ceo41rytm54lv" path="res://player/dying-minecraft.mp3" id="10_2ieo8"]
 [ext_resource type="Shader" path="res://player/damage_vignette.gdshader" id="11_vignette"]
 [ext_resource type="Script" path="res://player/weapon_hud.gd" id="12_weapon_hud"]
+[ext_resource type="Script" path="res://player/shield_bubble.gd" id="13_shield"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("11_vignette")
@@ -61,6 +62,10 @@ shape = SubResource("CapsuleShape2D_l1slb")
 
 [node name="Muzzle" type="Marker2D" parent="." unique_id=905117342]
 position = Vector2(93, -51)
+
+[node name="ShieldBubble" type="Node2D" parent="." unique_id=1288014470]
+position = Vector2(0, 10)
+script = ExtResource("13_shield")
 
 [node name="HitFlashComponent" type="Node" parent="." unique_id=412783593]
 script = ExtResource("5_hit_flash")
@@ -182,9 +187,9 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
-offset_top = -110.0
+offset_top = -150.0
 offset_right = 404.0
-offset_bottom = -24.0
+offset_bottom = -64.0
 grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_weapon_hud")

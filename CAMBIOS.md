@@ -52,5 +52,22 @@
 - 8 tomas animadas (`menu/intro.gd`, partículas en `menu/intro_fx.gd`): la flota en órbita con la nave insignia cruzando; la tropa saludando con polvo dorado; la colonia en llamas con humo y brasas; el enjambre avanzando hacia la cámara; el Hivelord con el núcleo latiendo en rojo y temblores; la cápsula cayendo en llamas con impacto; el aterrizaje con estallido de chispas; y el plano final con el título CHRONOS PROTOCOL.
 - Barras de cine arriba y abajo, textos de propaganda que se escriben solos, destellos, temblor de cámara y sonido. Clic o Espacio pasa de toma, Esc la salta.
 
+## Séptima ronda: racha de bajas
+- **Contador de racha** estilo Diablo (`player/kill_streak.gd`, `player/kill_streak_hud.gd`): a la derecha aparece "x12" desde la 3.ª baja seguida, con el nombre de la racha, una barra con el tiempo que queda y la siguiente recompensa. Hay 4 s para conseguir la siguiente baja; si se acaba el tiempo o el soldado recibe daño, la racha se corta (un golpe que bloquea el escudo no la corta).
+- **Recompensas:**
+  - 10 bajas: +1 de vida.
+  - 20: escudo que bloquea 2 golpes (burbuja cian con un punto por golpe, `player/shield_bubble.gd`).
+  - 30: sobrecarga por 6 s, con 35 % más de velocidad, doble cadencia en todas las armas y estela cian.
+  - 50: masacre, +3 de vida y escudo de 3 golpes.
+  - Desde ahí, cada 25 bajas: sobrecarga, escudo o +2 de vida, en ese orden.
+- Cada recompensa se anuncia con un texto grande y un sonido.
+- El HUD de arriba a la izquierda (puntaje y oleada) ya no se encima.
+
+## Octava ronda: correcciones
+- El panel del arma subió 40 px. En una ventana maximizada, la barra de tareas de Windows tapaba la parte de abajo. Nuevo: F11 o Alt+Enter cambian a pantalla completa real (`menu/window_controls.gd`, autoload).
+- Recibir daño ya no hace sonido: solo queda el destello. El sonido ahora suena solo al morir.
+- La racha ya no se pierde al terminar la oleada: se congela durante la transición, la tienda y la muerte del jefe, y al empezar la siguiente oleada sigue con el tiempo completo.
+- El HUD de racha ahora dice qué da la próxima recompensa ("A las 20: Bloquea los próximos 2 golpes").
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

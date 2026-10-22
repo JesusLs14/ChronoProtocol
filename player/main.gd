@@ -20,6 +20,7 @@ const BOSS_BASE_HEALTH: int = 500
 @onready var shop_status_label: Label = $UI/ShopPanel/ShopStatusLabel
 @onready var wave_director: WaveDirector = $WaveDirector
 @onready var wave_banner: WaveBanner = $UI/WaveBanner
+@onready var kill_streak: KillStreak = $KillStreak
 var spawn_timer: Timer
 var score: int = 0
 var closing_magnet_active: bool = false
@@ -55,6 +56,7 @@ func add_score(points: int) -> void:
 
 func register_enemy_kill(points: int = 10) -> void:
 	add_score(points)
+	kill_streak.register_kill()
 	# En las oleadas del jefe, las arañas que invoca solo dan puntos.
 	if _wave_has_ended or _boss_active:
 		return
@@ -87,6 +89,7 @@ func end_wave() -> void:
 
 	_wave_has_ended = true
 	spawn_timer.stop()
+	kill_streak.hold(true)
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		enemy.queue_free()
 	call_deferred("_finish_wave_transition")
@@ -197,6 +200,7 @@ func spawn_boss() -> void:
 
 func _on_boss_defeated() -> void:
 	_boss_active = false
+	kill_streak.hold(true)
 	boss_warning_label.text = "BOSS DEFEATED"
 	boss_warning_label.show()
 	# Las arañas que quedan desaparecen para que no maten al jugador ya ganado.
@@ -207,6 +211,7 @@ func _on_boss_defeated() -> void:
 	if wave_director.is_endless(current_wave):
 		# En el modo infinito el jefe es una oleada más: después viene la tienda.
 		_wave_has_ended = true
+		kill_streak.hold(true)
 		_finish_wave_transition()
 	else:
 		show_victory()
@@ -250,6 +255,7 @@ func _start_wave(wave: int) -> void:
 	enemies_killed = 0
 	closing_magnet_active = false
 	_wave_has_ended = false
+	kill_streak.hold(false)
 	_announce_wave(wave)
 	if wave_director.is_boss_wave(wave):
 		_update_wave_progress()

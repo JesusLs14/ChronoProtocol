@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 signal health_changed(current_health: int, max_health: int)
 signal weapon_changed(weapon_id: String)
+## Se emite cuando un golpe quita vida (no cuando lo bloquea el escudo).
+signal damaged
 
 @export var speed: float = 300.0
 @export var acceleration: float = 14.0
@@ -37,6 +39,15 @@ const STICK_AIM_DISTANCE: float = 400.0
 const DAMAGE_OVERLAY_ALPHA: float = 0.35
 const DAMAGE_OVERLAY_DURATION: float = 0.3
 var _damage_overlay_tween: Tween
+@onready var shield_bubble: ShieldBubble = $ShieldBubble
+
+# Sobrecarga (recompensa de racha): más velocidad y cadencia por un tiempo.
+const BOOST_SPEED_MULTIPLIER: float = 1.35
+const BOOST_FIRE_RATE_MULTIPLIER: float = 2.0
+const BOOST_TRAIL_INTERVAL: float = 0.07
+const SHIELD_BLOCK_INVULNERABILITY: float = 0.4
+var _boost_time_left: float = 0.0
+var _boost_trail_time: float = 0.0
 
 # Tiempo que el soldado sigue apuntando después del último disparo.
 const AIM_HOLD_TIME: float = 0.35
@@ -126,6 +137,7 @@ func _physics_process(delta: float) -> void:
 	_dash_cooldown_remaining = maxf(0.0, _dash_cooldown_remaining - delta)
 	_invulnerability_time_remaining = maxf(0.0, _invulnerability_time_remaining - delta)
 	_update_hurt_blink(delta)
+	_update_boost(delta)
 	_aim_time_remaining = maxf(0.0, _aim_time_remaining - delta)
 
 	var input_direction: Vector2 = _get_move_direction()
@@ -149,7 +161,7 @@ func _physics_process(delta: float) -> void:
 
 	if input_direction != Vector2.ZERO:
 		weight = 1.0 - exp(-acceleration * delta)
-		velocity = velocity.lerp(input_direction * speed, weight)
+		velocity = velocity.lerp(input_direction * speed * _speed_multiplier(), weight)
 	else:
 		weight = 1.0 - exp(-friction * delta)
 		velocity = velocity.lerp(Vector2.ZERO, weight)
@@ -180,6 +192,7 @@ func _start_dash(input_direction: Vector2) -> void:
 func _spawn_dash_trail() -> void:
 	var trail := anim_sprite.duplicate() as AnimatedSprite2D
 	trail.visible = true
+	trail.self_modulate.a = 1.0
 	trail.modulate = Color(0.35, 0.85, 1.0, 0.5)
 	trail.z_index = -1
 	trail.stop()
@@ -291,8 +304,16 @@ func take_damage() -> void:
 	if _invulnerability_time_remaining > 0.0 or current_health <= 0:
 		return
 
+	if shield_bubble.charges > 0:
+		shield_bubble.charges -= 1
+		shield_bubble.flash()
+		_invulnerability_time_remaining = SHIELD_BLOCK_INVULNERABILITY
+		Sfx.play("click", -2.0, 0.1)
+		return
+
+	damaged.emit()
+
 	current_health = maxi(0, current_health - 1)
-	$SfxHit.play()
 	health_changed.emit(current_health, max_health)
 	hit_flash.flash()
 	_flash_damage_overlay()
@@ -307,6 +328,7 @@ func take_damage() -> void:
 		return
 
 	is_dead = true
+	$SfxHit.play()
 	_hurt_blink_remaining = 0.0
 	anim_sprite.visible = true
 	_fire_held = false
@@ -321,6 +343,49 @@ func take_damage() -> void:
 		push_error("Cannot show game over: no main node exists in the main group.")
 		return
 	main.show_game_over()
+
+
+# --- Recompensas de racha ----------------------------------------------------
+
+func heal(amount: int) -> void:
+	if is_dead or amount <= 0:
+		return
+	current_health = mini(max_health, current_health + amount)
+	health_changed.emit(current_health, max_health)
+
+
+func add_shield(charges: int) -> void:
+	if is_dead or charges <= 0:
+		return
+	shield_bubble.charges += charges
+
+
+func apply_boost(seconds: float) -> void:
+	if is_dead or seconds <= 0.0:
+		return
+	_boost_time_left = maxf(_boost_time_left, seconds)
+	weapon_manager.fire_rate_multiplier = BOOST_FIRE_RATE_MULTIPLIER
+
+
+func is_boosted() -> bool:
+	return _boost_time_left > 0.0
+
+
+func _speed_multiplier() -> float:
+	return BOOST_SPEED_MULTIPLIER if is_boosted() else 1.0
+
+
+func _update_boost(delta: float) -> void:
+	if _boost_time_left <= 0.0:
+		return
+	_boost_time_left = maxf(0.0, _boost_time_left - delta)
+	# Estela cian mientras dura la sobrecarga.
+	_boost_trail_time -= delta
+	if _boost_trail_time <= 0.0 and velocity.length() > RUN_ANIMATION_MIN_SPEED:
+		_spawn_dash_trail()
+		_boost_trail_time = BOOST_TRAIL_INTERVAL
+	if _boost_time_left == 0.0:
+		weapon_manager.fire_rate_multiplier = 1.0
 
 
 # Parpadeo durante la invulnerabilidad que sigue a un golpe.
