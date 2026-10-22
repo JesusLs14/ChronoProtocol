@@ -47,5 +47,10 @@
 - El puntaje ahora se ve más grande y conserva la palabra "SCORE". Las arañas que invoca el jefe ya no cuentan para terminar la oleada (antes podían acabarla en medio de la pelea).
 - Se quitó el dron que aparecía fijo junto al jugador al empezar, porque la oleada 1 es solo de arañas.
 
+## Sexta ronda: intro cinemática
+- La intro anterior (sprites del juego como marionetas) se reemplazó por una cinemática con 10 ilustraciones nuevas generadas con los prompts de `GUION_INTRO.md`. Las originales están en `menu/intro_art/source/`; `prepare_intro_art.py` las escala y quita el fondo verde de la nave, el enjambre y la cápsula.
+- 8 tomas animadas (`menu/intro.gd`, partículas en `menu/intro_fx.gd`): la flota en órbita con la nave insignia cruzando; la tropa saludando con polvo dorado; la colonia en llamas con humo y brasas; el enjambre avanzando hacia la cámara; el Hivelord con el núcleo latiendo en rojo y temblores; la cápsula cayendo en llamas con impacto; el aterrizaje con estallido de chispas; y el plano final con el título CHRONOS PROTOCOL.
+- Barras de cine arriba y abajo, textos de propaganda que se escriben solos, destellos, temblor de cámara y sonido. Clic o Espacio pasa de toma, Esc la salta.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.
