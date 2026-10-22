@@ -14,6 +14,8 @@
 [ext_resource type="Shader" path="res://player/damage_vignette.gdshader" id="11_vignette"]
 [ext_resource type="Script" path="res://player/weapon_hud.gd" id="12_weapon_hud"]
 [ext_resource type="Script" path="res://player/shield_bubble.gd" id="13_shield"]
+[ext_resource type="Script" path="res://player/stratagems/stratagem_controller.gd" id="14_stratagems"]
+[ext_resource type="Script" path="res://player/stratagems/stratagem_hud.gd" id="15_stratagem_hud"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("11_vignette")
@@ -66,6 +68,9 @@ position = Vector2(93, -51)
 [node name="ShieldBubble" type="Node2D" parent="." unique_id=1288014470]
 position = Vector2(0, 10)
 script = ExtResource("13_shield")
+
+[node name="StratagemController" type="Node" parent="." unique_id=1903771001]
+script = ExtResource("14_stratagems")
 
 [node name="HitFlashComponent" type="Node" parent="." unique_id=412783593]
 script = ExtResource("5_hit_flash")
@@ -226,6 +231,19 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.75, 0.8, 1)
 theme_override_font_sizes/font_size = 16
 text = "Rueda del ratón: cambiar arma"
+
+[node name="StratagemHud" type="Control" parent="CanvasLayer" unique_id=1903771002]
+layout_mode = 3
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 24.0
+offset_top = -150.0
+offset_right = 354.0
+offset_bottom = 58.0
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("15_stratagem_hud")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1184115478 groups=["arena_camera", "screen_shake"]]
 position_smoothing_enabled = true

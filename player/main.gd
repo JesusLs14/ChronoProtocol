@@ -21,6 +21,12 @@ const BOSS_BASE_HEALTH: int = 500
 @onready var wave_director: WaveDirector = $WaveDirector
 @onready var wave_banner: WaveBanner = $UI/WaveBanner
 @onready var kill_streak: KillStreak = $KillStreak
+@onready var weapon_upgrades: WeaponUpgrades = $WeaponUpgrades
+@onready var upgrade_buttons: Dictionary = {
+	"fire_rate": $UI/ShopPanel/ShopTabs/Mejoras/FireRateButton,
+	"damage": $UI/ShopPanel/ShopTabs/Mejoras/DamageButton,
+	"pierce": $UI/ShopPanel/ShopTabs/Mejoras/PierceButton,
+}
 var spawn_timer: Timer
 var score: int = 0
 var closing_magnet_active: bool = false
@@ -45,6 +51,8 @@ func _ready() -> void:
 	$UI/ShopPanel/ShopTabs/Armería/ShotgunButton.pressed.connect(_on_shop_purchase_pressed.bind(3))
 	$UI/ShopPanel/ShopTabs/Armería/GrenadeLauncherButton.pressed.connect(_on_shop_purchase_pressed.bind(4))
 	$UI/ShopPanel/ContinueButton.pressed.connect(_on_continue_pressed)
+	for kind: String in upgrade_buttons:
+		upgrade_buttons[kind].pressed.connect(_on_upgrade_pressed.bind(kind))
 	wave_ended.connect(_on_wave_ended)
 	_start_wave(1)
 
@@ -123,6 +131,7 @@ func _on_wave_ended() -> void:
 
 	shop_fragments_label.text = "Core Fragments: %d" % player.core_fragments
 	shop_status_label.text = "Elige una mejora o arma"
+	_refresh_upgrade_buttons()
 	shop_panel.show()
 	get_tree().paused = true
 
@@ -171,6 +180,23 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 			print("Lanzagranadas comprado")
 			shop_status_label.text = "Lanzagranadas añadido al inventario"
 	shop_fragments_label.text = "Core Fragments: %d" % player.core_fragments
+
+
+func _on_upgrade_pressed(kind: String) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Player
+	if player == null:
+		push_error("Cannot buy upgrade: no Player exists in the player group.")
+		return
+	shop_status_label.text = weapon_upgrades.buy(kind, player)
+	shop_fragments_label.text = "Core Fragments: %d" % player.core_fragments
+	_refresh_upgrade_buttons()
+
+
+func _refresh_upgrade_buttons() -> void:
+	for kind: String in upgrade_buttons:
+		var button: Button = upgrade_buttons[kind]
+		button.text = weapon_upgrades.button_text(kind)
+		button.disabled = weapon_upgrades.is_maxed(kind)
 
 
 func spawn_boss() -> void:

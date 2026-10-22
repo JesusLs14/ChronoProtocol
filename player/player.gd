@@ -40,6 +40,7 @@ const DAMAGE_OVERLAY_ALPHA: float = 0.35
 const DAMAGE_OVERLAY_DURATION: float = 0.3
 var _damage_overlay_tween: Tween
 @onready var shield_bubble: ShieldBubble = $ShieldBubble
+@onready var stratagems: StratagemController = $StratagemController
 
 # Sobrecarga (recompensa de racha): más velocidad y cadencia por un tiempo.
 const BOOST_SPEED_MULTIPLIER: float = 1.35
@@ -109,7 +110,7 @@ func _input(event: InputEvent) -> void:
 
 # Mantener el clic dispara de forma continua, a la cadencia de cada arma.
 func _try_fire() -> void:
-	if is_dead or current_health <= 0 or _dash_time_remaining > 0.0:
+	if is_dead or current_health <= 0 or _dash_time_remaining > 0.0 or stratagems.entering:
 		return
 	var target := _get_aim_position()
 	_set_facing(target.x < global_position.x)
@@ -279,6 +280,9 @@ func _update_aim_pose(delta: float = 0.0) -> void:
 
 
 func _get_move_direction() -> Vector2:
+	# Mientras se mete una estratagema, WASD/flechas son para la combinación.
+	if stratagems.entering:
+		return Vector2.ZERO
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var keyboard_direction := Vector2(
 		Input.get_axis("ui_left", "ui_right"),

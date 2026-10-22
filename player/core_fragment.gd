@@ -9,6 +9,7 @@ var _elapsed_time: float = 0.0
 var _base_y: float
 var _collected: bool = false
 var _magnet_target: Node2D
+var _pop_tween: Tween
 
 
 func _ready() -> void:
@@ -35,11 +36,15 @@ func _process(delta: float) -> void:
 			_collect(_magnet_target)
 		return
 
+	if _pop_tween != null and _pop_tween.is_running():
+		return
 	_elapsed_time += delta
 	position.y = _base_y + sin(_elapsed_time * float_frequency) * float_amplitude
 
 
 func activate_closing_magnet(target: Node2D) -> void:
+	if _pop_tween != null and _pop_tween.is_running():
+		_pop_tween.kill()
 	_magnet_target = target
 	monitoring = false
 	monitorable = false
@@ -55,6 +60,15 @@ func set_amount(value: int) -> void:
 func set_spawn_position(world_position: Vector2) -> void:
 	global_position = world_position
 	_base_y = position.y
+
+
+## Salta desde donde apareció hasta world_position (al soltarse varios orbes).
+func pop_to(world_position: Vector2) -> void:
+	if is_instance_valid(_magnet_target):
+		return
+	_pop_tween = create_tween()
+	_pop_tween.tween_property(self, "global_position", world_position, 0.3) 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_pop_tween.tween_callback(func() -> void: _base_y = position.y)
 
 
 func _on_body_entered(body: Node2D) -> void:

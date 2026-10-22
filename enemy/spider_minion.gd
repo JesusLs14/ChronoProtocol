@@ -2,7 +2,8 @@ extends CharacterBody2D
 
 @export var speed: float = 220.0
 @export var fragment_scene: PackedScene
-@export_range(1, 100, 1) var fragment_drop_amount: int = 1
+## Orbes de Fragmento (de 1 cada uno) que suelta al morir.
+@export_range(1, 100, 1) var fragment_drop_amount: int = 2
 @export_range(1, 1000, 1) var score_points: int = 10
 @export_range(0.1, 5.0, 0.1) var attack_interval: float = 0.8
 
@@ -91,18 +92,7 @@ func _spawn_fragment() -> void:
 
 
 func _spawn_fragment_deferred(spawn_position: Vector2) -> void:
-	if fragment_scene == null:
-		push_error("SpiderMinion requires a fragment_scene to drop core fragments.")
-		return
-
-	var fragment := fragment_scene.instantiate() as Node2D
-	if fragment == null:
-		push_error("SpiderMinion fragment_scene must have a Node2D root.")
-		return
-
-	fragment.set_amount(fragment_drop_amount)
-	get_parent().add_child(fragment)
-	fragment.set_spawn_position(spawn_position)
+	FragmentDropper.drop(fragment_scene, get_parent(), spawn_position, fragment_drop_amount)
 
 
 func _on_animation_finished() -> void:

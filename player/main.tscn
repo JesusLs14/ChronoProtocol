@@ -15,6 +15,7 @@
 [ext_resource type="Resource" path="res://enemy/variants/gunner_drone.tres" id="21_gunner_drone"]
 [ext_resource type="Script" path="res://player/kill_streak.gd" id="22_kill_streak"]
 [ext_resource type="Script" path="res://player/kill_streak_hud.gd" id="23_streak_hud"]
+[ext_resource type="Script" path="res://player/weapon_upgrades.gd" id="24_weapon_upgrades"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_chasis.png" id="9_icon_chasis"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_overdrive.png" id="10_icon_overdrive"]
 [ext_resource type="Texture2D" path="res://player/shop_icons/icon_shotgun.png" id="11_icon_shotgun"]
@@ -50,6 +51,9 @@ fast_spider = ExtResource("18_fast_spider")
 armored_spider = ExtResource("19_armored_spider")
 drone = ExtResource("20_drone")
 gunner_drone = ExtResource("21_gunner_drone")
+
+[node name="WeaponUpgrades" type="Node" parent="." unique_id=1832900000]
+script = ExtResource("24_weapon_upgrades")
 
 [node name="KillStreak" type="Node" parent="." unique_id=1765330000]
 script = ExtResource("22_kill_streak")
@@ -207,6 +211,38 @@ text = "Comprar Lanzagranadas — 15 Fragmentos"
 icon = ExtResource("12_icon_grenade")
 expand_icon = true
 theme_override_constants/icon_max_width = 120
+
+[node name="Mejoras" type="Control" parent="UI/ShopPanel/ShopTabs" unique_id=1832900001]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="FireRateButton" type="Button" parent="UI/ShopPanel/ShopTabs/Mejoras" unique_id=1832900002]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 540.0
+offset_bottom = 64.0
+text = "FireRateButton"
+icon = ExtResource("10_icon_overdrive")
+expand_icon = true
+theme_override_constants/icon_max_width = 40
+
+[node name="DamageButton" type="Button" parent="UI/ShopPanel/ShopTabs/Mejoras" unique_id=1832900003]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 78.0
+offset_right = 540.0
+offset_bottom = 124.0
+text = "DamageButton"
+
+[node name="PierceButton" type="Button" parent="UI/ShopPanel/ShopTabs/Mejoras" unique_id=1832900004]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 138.0
+offset_right = 540.0
+offset_bottom = 184.0
+text = "PierceButton"
 
 [node name="ShopStatusLabel" type="Label" parent="UI/ShopPanel" unique_id=1177744069]
 layout_mode = 0

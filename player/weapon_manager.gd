@@ -10,6 +10,10 @@ const MAX_WEAPON_SLOTS: int = 4
 
 ## Multiplica la cadencia de todas las armas (p. ej. la sobrecarga de racha).
 var fire_rate_multiplier: float = 1.0
+## Mejoras compradas en la tienda (WeaponUpgrades).
+var upgrade_fire_rate_multiplier: float = 1.0
+var damage_bonus: int = 0
+var pierce_bonus: int = 0
 var _player: Node2D
 var _muzzle: Node2D
 var _active_weapons: Array[WeaponData] = []
@@ -32,10 +36,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var rate := fire_rate_multiplier * upgrade_fire_rate_multiplier
 	for index in range(_fire_cooldowns.size()):
-		_fire_cooldowns[index] = maxf(0.0, _fire_cooldowns[index] - delta * fire_rate_multiplier)
+		_fire_cooldowns[index] = maxf(0.0, _fire_cooldowns[index] - delta * rate)
 	for weapon: WeaponData in _separate_cooldowns:
-		_separate_cooldowns[weapon] = maxf(0.0, _separate_cooldowns[weapon] - delta * fire_rate_multiplier)
+		_separate_cooldowns[weapon] = maxf(0.0, _separate_cooldowns[weapon] - delta * rate)
 
 
 func add_weapon(weapon: WeaponData) -> bool:
@@ -99,6 +104,7 @@ func fire_at(
 				weapon_fired = false
 				continue
 
+			_apply_upgrades(projectile)
 			_player.get_parent().add_child(projectile)
 			projectile.global_position = _spawn_position()
 			projectile.global_rotation = projectile_direction.angle()
@@ -130,6 +136,7 @@ func fire_weapon_at(weapon: WeaponData, target_position: Vector2) -> bool:
 		push_error("Weapon '%s' projectile scene must have a Node2D root." % weapon.weapon_name)
 		return false
 
+	_apply_upgrades(projectile)
 	_player.get_parent().add_child(projectile)
 	projectile.global_position = _spawn_position()
 	projectile.global_rotation = aim_direction.angle()
@@ -137,6 +144,16 @@ func fire_weapon_at(weapon: WeaponData, target_position: Vector2) -> bool:
 		projectile.set_target(target_position)
 	_separate_cooldowns[weapon] = weapon.fire_interval
 	return true
+
+
+# Daño y perforación comprados en la tienda.
+func _apply_upgrades(projectile: Node) -> void:
+	if "damage" in projectile:
+		projectile.damage += damage_bonus
+	if "explosion_damage" in projectile:
+		projectile.explosion_damage += damage_bonus
+	if "pierce" in projectile:
+		projectile.pierce += pierce_bonus
 
 
 func _spawn_position() -> Vector2:

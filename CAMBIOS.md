@@ -69,5 +69,22 @@
 - La racha ya no se pierde al terminar la oleada: se congela durante la transición, la tienda y la muerte del jefe, y al empezar la siguiente oleada sigue con el tiempo completo.
 - El HUD de racha ahora dice qué da la próxima recompensa ("A las 20: Bloquea los próximos 2 golpes").
 
+## Novena ronda: mejoras de arma y más fragmentos
+- **Pestaña "Mejoras" en la tienda** (`player/weapon_upgrades.gd`). Cada mejora sube de nivel, se aplica a todas las armas y el botón muestra el nivel actual y el costo del siguiente:
+  - Cadencia: +15 % por nivel, 5 niveles (10, 15, 20, 25, 30 fragmentos).
+  - Daño: +1 por bala, y también a la explosión de la granada; 3 niveles (15, 25, 35).
+  - Perforación: la bala atraviesa +1 enemigo; 2 niveles (20, 35).
+  - Al llegar al máximo, el botón dice MÁXIMO y se desactiva. La cadencia se suma a la sobrecarga de la racha.
+- **Más orbes:** los enemigos sueltan varios orbes de 1 fragmento que saltan alrededor (`player/fragment_dropper.gd`). La araña suelta 2, el dron 3, y las acorazadas y los drones artilleros 1 más. Además, cada enemigo tiene 25 % de probabilidad de soltar un orbe extra.
+
+## Décima ronda: estratagemas estilo Helldivers 2
+- Se mantiene **Ctrl o Q** (o Back en el mando), se mete la combinación con WASD, las flechas o la cruceta, y la baliza se lanza hacia el ratón (máximo 650 px). Mientras se mete la combinación el soldado no camina ni dispara, y un error reinicia la combinación (`player/stratagems/stratagem_controller.gd`).
+- La baliza marca la zona con un haz de luz y a los 2 s llega la ayuda (`stratagem_beacon.gd`):
+  - **Ataque orbital** → ↓ ↑ → (recarga 30 s): explosión de 280 px de radio que hace 12 de daño.
+  - **Suministros** ↓ ↓ ↑ → (recarga 40 s): cae una cápsula y deja una caja que da +3 de vida y un escudo de 1 golpe al tocarla. Dura 30 s (`supply_crate.gd`).
+  - **Torreta** ↓ ↑ → ← (recarga 45 s): cae una torreta que dispara sola al enemigo más cercano durante 20 s (`sentry_turret.gd`).
+  - Las cápsulas usan la ilustración de la intro y dañan a lo que aplastan.
+- Panel a la izquierda (`stratagem_hud.gd`): siempre muestra cada estratagema con su recarga; al mantener Ctrl/Q se ilumina y marca las flechas que ya se metieron. Los controles del menú lo explican.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

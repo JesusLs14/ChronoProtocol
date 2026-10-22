@@ -152,6 +152,7 @@ Disparar:  clic izquierdo (mantener)  /  LB o LT
 Dash:  Espacio  /  Shift  /  RB
 Cambiar de arma:  rueda del ratón
 Pausa:  Esc  /  Start
+Estratagemas:  mantén Ctrl o Q + WASD / flechas
 Pantalla completa:  F11"
 
 [node name="BackButton" type="Button" parent="ControlsPanel"]
