@@ -86,5 +86,26 @@
   - Las cápsulas usan la ilustración de la intro y dañan a lo que aplastan.
 - Panel a la izquierda (`stratagem_hud.gd`): siempre muestra cada estratagema con su recarga; al mantener Ctrl/Q se ilumina y marca las flechas que ya se metieron. Los controles del menú lo explican.
 
+## Undécima ronda: récords, volumen, flechas, efectos, entrada del jefe y más contenido
+- **Récords guardados** (autoload `GameStats`, `menu/game_stats.gd`, archivo `user://stats.cfg`): mejor puntaje, mejor racha, oleada más alta, partidas, bajas totales y jefes derrotados. Se ven abajo a la izquierda del menú principal y en el Game Over y la Victoria, con "¡NUEVO RÉCORD!" cuando se supera alguno. También se guardan al reiniciar o salir al menú desde la pausa.
+- **Volumen** (autoload `GameSettings`, `menu/game_settings.gd`, archivo `user://settings.cfg`): deslizadores de Música y Efectos en el nuevo botón OPCIONES del menú y en la pausa. Crea los buses "Music" y "SFX" y manda solo la música al primero y todos los demás sonidos al segundo.
+- **Flechas de enemigos fuera de pantalla** (`player/offscreen_indicators.gd`): en el borde, del color de cada enemigo, más grandes y opacas cuanto más cerca está. El jefe tiene una flecha roja grande que late con la palabra JEFE.
+- **Números de daño y explosión al morir** (`player/combat_fx.gd`, desde `enemy/health_component.gd`): cada golpe hace saltar el daño (amarillo, naranja si es 5 o más, rojo el golpe que mata) y al morir el enemigo estalla en pedazos de su color con un pequeño sonido.
+- **Entrada del Hivelord** (`player/boss_intro.gd`): barras de cine, el HUD se oculta, la cámara viaja hasta el jefe y se acerca mientras cae del cielo, impacto con temblor, "SEÑOR DE LA COLMENA / HIVELORD" y rugido; luego la cámara vuelve al soldado y empieza la pelea. Durante la entrada el soldado no se mueve ni recibe daño, y el jefe no ataca (`Boss.intro_mode`, `start_fight()`).
+- **Estratagemas nuevas** (`stratagem_controller.gd`, `stratagem_beacon.gd`):
+  - **Ataque aéreo** ↑ → ↓ → (recarga 35 s): cruza la sombra de un caza y caen 6 bombas en fila en la dirección del lanzamiento (6 de daño, 130 px cada una).
+  - **Pulso EMS** ↓ ← ↑ ← (recarga 50 s): onda de 340 px que hace 1 de daño y paraliza 5 s a los enemigos (no al jefe): no se mueven, no disparan, se ponen azules y les saltan chispas (`player/stratagems/stun_effect.gd`).
+- **Enemigo nuevo: Araña bomba** (`enemy/spider_bomber.gd`, `spider_bomber.tscn`, `variants/bomber_spider.tres`): amarilla, 2 de vida, algo más rápida. Al alcanzar al soldado parpadea y explota a los 0.6 s; también explota si la matan. La explosión quita 2 de vida al soldado y 3 a los enemigos cercanos (puede encadenar otras bombas). Aparece desde la oleada 4 y en el modo infinito. `Player.take_damage()` ahora acepta la cantidad de daño (por defecto 1).
+
+## Duodécima ronda: el Soldado Cero
+- **Nuevo jefe en la oleada 10** (`enemy/corrupted_soldier.gd`, `corrupted_soldier.tscn`): un soldado Chronos contaminado por la Colmena. Usa los mismos sprites y la misma pose de apuntado del protagonista con el shader `enemy/corruption.gdshader` (morado, venas verdes que laten, las luces cian del traje en rojo y franjas de glitch que aumentan al enfurecerse).
+  - Se mueve de lado manteniendo distancia y hace dash con estela morada; durante el dash las balas lo atraviesan.
+  - Ráfagas de plasma morado avisadas con una línea roja de mira (los últimos instantes la mira se queda fija para poder esquivar).
+  - Bajo la mitad de vida se enfurece: escopeta en abanico (con aviso en cono), tres granadas tóxicas que marcan un círculo verde antes de explotar, y su propio orbital con baliza roja (2 de daño).
+  - Al bajar del 66 % y del 33 % de vida se cubre con un escudo que hay que romper a balazos.
+  - Barra de vida morada "SOLDADO CERO" (verde al enfurecerse) y entrada cinemática "SOLDADO CERO — EL PRIMERO QUE CAYÓ".
+- **Jefes al azar** (`wave_director.gd`): oleada 5 Hivelord, oleada 10 Soldado Cero y desde la 15, cada 5 oleadas, uno al azar. Cada aparición sube un nivel: el Hivelord tiene 50 % más de vida y ataca 8 % más seguido por nivel; el Soldado Cero gana 120 de vida, más balas por ráfaga, más velocidad y más agresividad. El aviso de la oleada dice qué jefe se acerca.
+- Los jefes llevan el grupo "boss" (flechas, estallido grande y el EMS no los paraliza) y comparten `configure()`, `start_fight()`, `intro_roar()` e `intro_settle()` para la entrada.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

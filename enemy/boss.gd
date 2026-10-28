@@ -13,6 +13,11 @@ signal defeated
 @export_range(0.1, 5.0, 0.1) var summon_attack_duration: float = 1.0
 @export var missile_scene: PackedScene
 @export var spider_scene: PackedScene
+## Si es true, el jefe espera a start_fight() para atacar (entrada cinemática).
+var intro_mode: bool = false
+var intro_title: String = "HIVELORD"
+var intro_subtitle: String = "SEÑOR DE LA COLMENA"
+var intro_color: Color = Color(1.0, 0.18, 0.15)
 
 var current_state: BossState = BossState.IDLE
 var is_enraged: bool = false
@@ -43,7 +48,35 @@ func _ready() -> void:
 	sprite.play("idle")
 	_disable_laser()
 	laser_hitbox.body_entered.connect(_on_laser_body_entered)
-	_start_attack_timer()
+	if intro_mode:
+		health_bar.visible = false
+	else:
+		_start_attack_timer()
+
+
+## Vida y velocidad de ataque según cuántas veces ha salido (0 = oleada 5).
+## Se llama antes de añadirlo al árbol.
+func configure(tier: int) -> void:
+	max_health = roundi(500 * (1.0 + 0.5 * tier))
+	var speed_up := maxf(0.55, 1.0 - 0.08 * tier)
+	attack_interval_min *= speed_up
+	attack_interval_max *= speed_up
+
+
+func intro_roar() -> void:
+	sprite.play("summon")
+
+
+func intro_settle() -> void:
+	sprite.play("idle")
+
+
+## Termina la entrada: aparece la barra de vida y empiezan los ataques.
+func start_fight() -> void:
+	intro_mode = false
+	health_bar.visible = true
+	if not _is_defeated:
+		_start_attack_timer()
 
 
 func _physics_process(delta: float) -> void:

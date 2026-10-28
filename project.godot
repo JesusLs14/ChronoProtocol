@@ -20,6 +20,8 @@ config/icon="res://icon.svg"
 Musica="*uid://cpl4drd4ppnot"
 Sfx="*res://sfx/sfx.gd"
 WindowControls="*res://menu/window_controls.gd"
+GameSettings="*res://menu/game_settings.gd"
+GameStats="*res://menu/game_stats.gd"
 
 [display]
 

@@ -12,6 +12,8 @@ signal damaged
 @export var max_health: int = 10
 var current_health: int = 10
 var is_dead: bool = false
+## Durante una cinemática (entrada del jefe) no se mueve, no dispara y no recibe daño.
+var in_cinematic: bool = false
 var has_shotgun: bool = false
 var has_grenade_launcher: bool = false
 var unlocked_weapons: Array[String] = ["pistol"]
@@ -110,7 +112,7 @@ func _input(event: InputEvent) -> void:
 
 # Mantener el clic dispara de forma continua, a la cadencia de cada arma.
 func _try_fire() -> void:
-	if is_dead or current_health <= 0 or _dash_time_remaining > 0.0 or stratagems.entering:
+	if is_dead or in_cinematic or current_health <= 0 or _dash_time_remaining > 0.0 or stratagems.entering:
 		return
 	var target := _get_aim_position()
 	_set_facing(target.x < global_position.x)
@@ -142,7 +144,7 @@ func _physics_process(delta: float) -> void:
 	_aim_time_remaining = maxf(0.0, _aim_time_remaining - delta)
 
 	var input_direction: Vector2 = _get_move_direction()
-	if Input.is_action_just_pressed("dash") and _dash_cooldown_remaining == 0.0:
+	if Input.is_action_just_pressed("dash") and _dash_cooldown_remaining == 0.0 and not in_cinematic:
 		_start_dash(input_direction)
 
 	if _dash_time_remaining > 0.0:
@@ -281,7 +283,7 @@ func _update_aim_pose(delta: float = 0.0) -> void:
 
 func _get_move_direction() -> Vector2:
 	# Mientras se mete una estratagema, WASD/flechas son para la combinación.
-	if stratagems.entering:
+	if stratagems.entering or in_cinematic:
 		return Vector2.ZERO
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var keyboard_direction := Vector2(
@@ -304,8 +306,8 @@ func _get_move_direction() -> Vector2:
 	return direction
 
 
-func take_damage() -> void:
-	if _invulnerability_time_remaining > 0.0 or current_health <= 0:
+func take_damage(amount: int = 1) -> void:
+	if _invulnerability_time_remaining > 0.0 or current_health <= 0 or in_cinematic:
 		return
 
 	if shield_bubble.charges > 0:
@@ -317,7 +319,7 @@ func take_damage() -> void:
 
 	damaged.emit()
 
-	current_health = maxi(0, current_health - 1)
+	current_health = maxi(0, current_health - maxi(1, amount))
 	health_changed.emit(current_health, max_health)
 	hit_flash.flash()
 	_flash_damage_overlay()

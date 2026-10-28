@@ -7,7 +7,7 @@ extends Control
 
 @export var controller_path: NodePath = ^"../../StratagemController"
 
-const ROW_HEIGHT: float = 58.0
+const ROW_HEIGHT: float = 54.0
 const WIDTH: float = 330.0
 const ARROW_SIZE: float = 22.0
 const ARROW_GAP: float = 30.0

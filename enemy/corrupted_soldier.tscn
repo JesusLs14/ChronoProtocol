@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://enemy/corrupted_soldier.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://player/soldier/soldier_sprite_frames.tres" id="2_frames"]
+[ext_resource type="Shader" path="res://enemy/corruption.gdshader" id="3_shader"]
+[ext_resource type="Script" path="res://enemy/health_component.gd" id="4_health"]
+[ext_resource type="Script" path="res://player/hit_flash_component.gd" id="5_hit_flash"]
+[ext_resource type="PackedScene" path="res://enemy/boss_health_bar.tscn" id="6_health_bar"]
+[ext_resource type="AudioStream" path="res://player/chakong-laser-gun-shot-sound-future-sci-fi-lazer-wobble-chakongaudio-174883.mp3" id="7_shoot"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_corruption"]
+shader = ExtResource("3_shader")
+shader_parameter/glitch = 0.3
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 42.0
+height = 112.0
+
+[node name="CorruptedSoldier" type="CharacterBody2D" groups=["enemy", "boss"]]
+collision_layer = 2
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+material = SubResource("ShaderMaterial_corruption")
+position = Vector2(0, 66)
+scale = Vector2(3, 3)
+offset = Vector2(0, -30)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 10)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, 10)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("4_health")
+max_health = 420
+
+[node name="HitFlashComponent" type="Node" parent="."]
+script = ExtResource("5_hit_flash")
+
+[node name="BossHealthBar" parent="." instance=ExtResource("6_health_bar")]
+boss_name = "SOLDADO CERO"
+normal_fill_color = Color(0.65, 0.2, 0.9, 1)
+enraged_fill_color = Color(0.4, 1, 0.3, 1)
+
+[node name="SfxShoot" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_shoot")
+volume_db = -4.0
+pitch_scale = 0.75
+max_distance = 4000.0

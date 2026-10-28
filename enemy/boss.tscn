@@ -196,7 +196,7 @@ radius = 88.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_laser"]
 size = Vector2(1000, 24)
 
-[node name="Boss" type="CharacterBody2D" unique_id=1717222052 groups=["enemy"]]
+[node name="Boss" type="CharacterBody2D" unique_id=1717222052 groups=["enemy", "boss"]]
 collision_layer = 2
 script = ExtResource("1_boss")
 missile_scene = ExtResource("5_missile")

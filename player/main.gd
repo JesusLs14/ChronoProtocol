@@ -7,9 +7,10 @@ const MAIN_MENU_PATH: String = "res://menu/main_menu.tscn"
 # Pausa entre la muerte del jefe y la pantalla de victoria.
 const VICTORY_DELAY: float = 1.5
 const SHOP_COSTS: Array[int] = [5, 8, 10, 12, 15]
-const BOSS_BASE_HEALTH: int = 500
+const BOSS_NAMES: Dictionary = {"hivelord": "el Hivelord", "soldier": "el Soldado Cero"}
 
 @export var boss_scene: PackedScene
+@export var soldier_boss_scene: PackedScene
 @onready var score_label = $UI/ScoreLabel
 @onready var game_over_panel = $UI/GameOverPanel
 @onready var final_score_label = $UI/GameOverPanel/FinalScoreLabel
@@ -33,8 +34,15 @@ var closing_magnet_active: bool = false
 var _wave_has_ended: bool = false
 var _boss_active: bool = false
 var current_wave: int = 1
+var _current_boss: String = "hivelord"
 var enemies_to_kill: int = 15
 var enemies_killed: int = 0
+# Estadísticas de la partida que aún no se guardaron en GameStats.
+var _run_kills: int = 0
+var _run_bosses: int = 0
+var _run_counted: bool = false
+var _game_over_records: Label
+var _victory_records: Label
 
 func _ready() -> void:
 	spawn_timer = Timer.new()
@@ -54,6 +62,11 @@ func _ready() -> void:
 	for kind: String in upgrade_buttons:
 		upgrade_buttons[kind].pressed.connect(_on_upgrade_pressed.bind(kind))
 	wave_ended.connect(_on_wave_ended)
+	var indicators := OffscreenIndicators.new()
+	$UI.add_child(indicators)
+	$UI.move_child(indicators, 0)
+	_game_over_records = _make_records_label($UI/GameOverPanel, 160.0)
+	_victory_records = _make_records_label($UI/VictoryPanel, 300.0)
 	_start_wave(1)
 
 func add_score(points: int) -> void:
@@ -64,6 +77,7 @@ func add_score(points: int) -> void:
 
 func register_enemy_kill(points: int = 10) -> void:
 	add_score(points)
+	_run_kills += 1
 	kill_streak.register_kill()
 	# En las oleadas del jefe, las arañas que invoca solo dan puntos.
 	if _wave_has_ended or _boss_active:
@@ -79,14 +93,17 @@ func show_game_over() -> void:
 	get_tree().paused = true
 	if final_score_label:
 		final_score_label.text = "Score: %d" % score
+	_show_records(_game_over_records, commit_stats())
 	game_over_panel.show()
 
 func _on_retry_pressed() -> void:
+	commit_stats()
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
 func _on_menu_pressed() -> void:
+	commit_stats()
 	get_tree().paused = false
 	get_tree().change_scene_to_file(MAIN_MENU_PATH)
 
@@ -205,8 +222,9 @@ func spawn_boss() -> void:
 	boss_warning_label.show()
 	await get_tree().create_timer(1.5).timeout
 	boss_warning_label.hide()
-	if boss_scene == null:
-		push_error("Cannot spawn final boss: boss_scene is not assigned.")
+	var scene := soldier_boss_scene if _current_boss == "soldier" else boss_scene
+	if scene == null:
+		push_error("Cannot spawn boss '%s': its scene is not assigned." % _current_boss)
 		return
 
 	var player := get_tree().get_first_node_in_group("player") as Node2D
@@ -214,18 +232,28 @@ func spawn_boss() -> void:
 		push_error("Cannot spawn final boss: no player exists in the player group.")
 		return
 
-	var boss := boss_scene.instantiate() as Boss
-	if boss == null:
-		push_error("boss_scene must have a Boss root node.")
+	var boss := scene.instantiate() as Node2D
+	if boss == null or not boss.has_method("configure"):
+		push_error("Boss scenes need a Node2D root with configure().")
 		return
-	boss.max_health = roundi(BOSS_BASE_HEALTH * wave_director.boss_health_multiplier(current_wave))
+	boss.configure(wave_director.boss_tier(current_wave))
+	boss.intro_mode = true
+	# Invisible hasta que la entrada lo hace caer del cielo.
+	boss.modulate.a = 0.0
 	add_child(boss)
-	boss.global_position = player.global_position + Vector2(0.0, -300.0)
+	var spawn_distance := 330.0 if _current_boss == "soldier" else 300.0
+	boss.global_position = player.global_position + Vector2(0.0, -spawn_distance)
 	boss.defeated.connect(_on_boss_defeated)
+	var player_node := player as Player
+	if player_node != null:
+		await BossIntro.play(self, boss, player_node).finished
+	if is_instance_valid(boss):
+		boss.start_fight()
 
 
 func _on_boss_defeated() -> void:
 	_boss_active = false
+	_run_bosses += 1
 	kill_streak.hold(true)
 	boss_warning_label.text = "BOSS DEFEATED"
 	boss_warning_label.show()
@@ -247,6 +275,7 @@ func show_victory() -> void:
 	spawn_timer.stop()
 	get_tree().paused = true
 	$UI/VictoryPanel/VictoryScoreLabel.text = "Score: %d" % score
+	_show_records(_victory_records, commit_stats())
 	$UI/VictoryPanel.show()
 	$UI/VictoryPanel/Buttons/EndlessButton.grab_focus()
 
@@ -282,6 +311,8 @@ func _start_wave(wave: int) -> void:
 	closing_magnet_active = false
 	_wave_has_ended = false
 	kill_streak.hold(false)
+	if wave_director.is_boss_wave(wave):
+		_current_boss = wave_director.pick_boss(wave)
 	_announce_wave(wave)
 	if wave_director.is_boss_wave(wave):
 		_update_wave_progress()
@@ -300,7 +331,7 @@ func _announce_wave(wave: int) -> void:
 		title = "MODO INFINITO · OLEADA %d" % wave
 	var subtitle := ""
 	if wave_director.is_boss_wave(wave):
-		subtitle = "Se acerca el Hivelord"
+		subtitle = "Se acerca " + BOSS_NAMES.get(_current_boss, "un jefe")
 	else:
 		var names := wave_director.new_enemy_names(wave)
 		if not names.is_empty():
@@ -325,3 +356,43 @@ func _spawn_enemy() -> void:
 	var spawn_distance := randf_range(400.0, 600.0)
 	add_child(enemy)
 	enemy.global_position = player.global_position + spawn_direction * spawn_distance
+
+
+## Guarda en GameStats lo nuevo de esta partida (se puede llamar varias veces:
+## solo suma lo que falta). Devuelve los récords superados.
+func commit_stats() -> PackedStringArray:
+	var games := 0 if _run_counted else 1
+	_run_counted = true
+	var records := GameStats.submit(score, kill_streak.best, current_wave, _run_kills, games, _run_bosses)
+	_run_kills = 0
+	_run_bosses = 0
+	return records
+
+
+func _make_records_label(panel: Control, top: float) -> Label:
+	var label := Label.new()
+	label.set_anchors_preset(Control.PRESET_CENTER)
+	label.offset_left = -600.0
+	label.offset_right = 600.0
+	label.offset_top = top
+	label.offset_bottom = top + 90.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 24)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 6)
+	panel.add_child(label)
+	return label
+
+
+func _show_records(label: Label, records: PackedStringArray) -> void:
+	var text := GameStats.records_line()
+	if records.is_empty():
+		label.add_theme_color_override("font_color", Color(0.75, 0.9, 1.0))
+	else:
+		text = "¡NUEVO RÉCORD! (%s)
+" % ", ".join(records) + text
+		label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+		var tween := label.create_tween().set_loops(4)
+		tween.tween_property(label, "modulate", Color(1.4, 1.4, 1.4), 0.25)
+		tween.tween_property(label, "modulate", Color.WHITE, 0.25)
+	label.text = text

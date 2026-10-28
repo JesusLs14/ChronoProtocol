@@ -3,7 +3,8 @@ extends Node
 
 ## Decide qué enemigos trae cada oleada, cuántas bajas se necesitan y cómo
 ## sube la dificultad. Las oleadas 1-4 son la campaña, la 5 es el jefe y desde
-## la 6 empieza el modo infinito, con un jefe cada 5 oleadas.
+## la 6 empieza el modo infinito, con un jefe cada 5 oleadas: en la 10 el
+## Soldado Cero y desde la 15 uno al azar, cada vez más fuerte.
 
 const BOSS_WAVE: int = 5
 const ENDLESS_BOSS_EVERY: int = 5
@@ -14,6 +15,7 @@ const CAMPAIGN_KILLS: Array[int] = [15, 20, 30, 50]
 @export var armored_spider: EnemyVariant
 @export var drone: EnemyVariant
 @export var gunner_drone: EnemyVariant
+@export var bomber_spider: EnemyVariant
 
 
 func is_endless(wave: int) -> bool:
@@ -39,11 +41,19 @@ func spawn_interval(wave: int) -> float:
 	return 1.5 if not is_endless(wave) else maxf(0.6, 1.2 - 0.05 * (wave - BOSS_WAVE))
 
 
-## Vida del jefe: cada vez que vuelve en el modo infinito tiene un 50 % más.
-func boss_health_multiplier(wave: int) -> float:
-	if not is_endless(wave):
-		return 1.0
-	return 1.0 + 0.5 * float((wave - BOSS_WAVE) / ENDLESS_BOSS_EVERY)
+## Qué jefe sale: "hivelord" o "soldier".
+func pick_boss(wave: int) -> String:
+	if wave == BOSS_WAVE:
+		return "hivelord"
+	if wave == BOSS_WAVE + ENDLESS_BOSS_EVERY:
+		return "soldier"
+	return ["hivelord", "soldier"].pick_random()
+
+
+## Nivel de dificultad del jefe: 0 en la oleada 5, 1 en la 10, 2 en la 15...
+## Cada jefe lo usa para subir su vida y su agresividad.
+func boss_tier(wave: int) -> int:
+	return maxi(0, (wave - BOSS_WAVE) / ENDLESS_BOSS_EVERY)
 
 
 ## Pares [variante, peso] de la oleada.
@@ -56,10 +66,13 @@ func composition(wave: int) -> Array:
 		3:
 			return [[spider, 0.4], [fast_spider, 0.35], [drone, 0.25]]
 		4:
-			return [[fast_spider, 0.3], [armored_spider, 0.3], [drone, 0.2], [gunner_drone, 0.2]]
+			return [
+				[fast_spider, 0.25], [armored_spider, 0.25], [bomber_spider, 0.15],
+				[drone, 0.15], [gunner_drone, 0.2],
+			]
 	return [
-		[spider, 0.2], [fast_spider, 0.25], [armored_spider, 0.2],
-		[drone, 0.15], [gunner_drone, 0.2],
+		[spider, 0.15], [fast_spider, 0.2], [armored_spider, 0.2], [bomber_spider, 0.15],
+		[drone, 0.15], [gunner_drone, 0.15],
 	]
 
 

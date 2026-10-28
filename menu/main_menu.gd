@@ -1,7 +1,7 @@
 extends Control
 
-## Menú principal: Jugar abre la intro (y después la arena), Controles muestra las teclas y Salir
-## cierra el juego.
+## Menú principal: Jugar abre la intro (y después la arena), Controles muestra las teclas,
+## Opciones el volumen y Salir cierra el juego. Abajo a la izquierda se ven los récords.
 
 @export_file("*.tscn") var game_scene_path: String = "res://menu/intro.tscn"
 
@@ -12,6 +12,10 @@ extends Control
 @onready var controls_panel: Panel = $ControlsPanel
 @onready var back_button: Button = $ControlsPanel/BackButton
 @onready var title_label: Label = $TitleLabel
+@onready var options_button: Button = $Buttons/OptionsButton
+@onready var options_panel: Panel = $OptionsPanel
+@onready var options_back_button: Button = $OptionsPanel/OptionsBackButton
+@onready var stats_label: Label = $StatsLabel
 
 
 func _ready() -> void:
@@ -20,14 +24,24 @@ func _ready() -> void:
 	controls_button.pressed.connect(_on_controls_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	back_button.pressed.connect(_on_back_pressed)
+	options_button.pressed.connect(_on_options_pressed)
+	options_back_button.pressed.connect(_on_options_back_pressed)
+	$OptionsPanel/VolumeSlot.add_child(GameSettings.create_volume_controls())
+	stats_label.text = GameStats.summary_text()
 	controls_panel.hide()
+	options_panel.hide()
 	play_button.grab_focus()
 	_animate_title()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if controls_panel.visible and event.is_action_pressed("ui_cancel"):
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if controls_panel.visible:
 		_on_back_pressed()
+		get_viewport().set_input_as_handled()
+	elif options_panel.visible:
+		_on_options_back_pressed()
 		get_viewport().set_input_as_handled()
 
 
@@ -51,6 +65,18 @@ func _on_back_pressed() -> void:
 	controls_panel.hide()
 	buttons.show()
 	controls_button.grab_focus()
+
+
+func _on_options_pressed() -> void:
+	buttons.hide()
+	options_panel.show()
+	options_back_button.grab_focus()
+
+
+func _on_options_back_pressed() -> void:
+	options_panel.hide()
+	buttons.show()
+	options_button.grab_focus()
 
 
 func _on_quit_pressed() -> void:

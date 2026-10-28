@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyVariant" format=3]
+
+[ext_resource type="Script" path="res://enemy/enemy_variant.gd" id="1_variant"]
+[ext_resource type="PackedScene" path="res://enemy/spider_bomber.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_variant")
+display_name = "Araña bomba"
+scene = ExtResource("2_scene")
+health = 2
+speed_multiplier = 1.15
+size_multiplier = 1.1
+tint = Color(1, 0.85, 0.25, 1)
+score_points = 20

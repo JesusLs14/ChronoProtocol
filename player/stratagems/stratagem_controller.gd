@@ -33,6 +33,20 @@ const STRATAGEMS: Array[Dictionary] = [
 		"cooldown": 45.0,
 		"color": Color(0.4, 1.0, 0.4),
 	},
+	{
+		"id": "airstrike",
+		"name": "Ataque aéreo",
+		"code": [Dir.UP, Dir.RIGHT, Dir.DOWN, Dir.RIGHT],
+		"cooldown": 35.0,
+		"color": Color(1.0, 0.8, 0.2),
+	},
+	{
+		"id": "ems",
+		"name": "Pulso EMS",
+		"code": [Dir.DOWN, Dir.LEFT, Dir.UP, Dir.LEFT],
+		"cooldown": 50.0,
+		"color": Color(0.6, 0.55, 1.0),
+	},
 ]
 ## Distancia máxima a la que se lanza la baliza.
 const THROW_RANGE: float = 650.0
@@ -56,7 +70,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	for id: String in cooldowns:
 		cooldowns[id] = maxf(0.0, cooldowns[id] - delta)
-	var holding := Input.is_action_pressed("stratagem") and not _player.is_dead
+	var holding := Input.is_action_pressed("stratagem") and not _player.is_dead and not _player.in_cinematic
 	if holding != entering:
 		entering = holding
 		sequence.clear()
