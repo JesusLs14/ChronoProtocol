@@ -103,6 +103,9 @@ func _physics_process(delta: float) -> void:
 			else:
 				velocity = global_position.direction_to(_slam_target) * current_slam_speed
 				move_and_slide()
+				# Si choca con una columna (o con el soldado) la embestida termina ahí.
+				if get_slide_collision_count() > 0:
+					_return_to_idle()
 		_:
 			velocity = Vector2.ZERO
 

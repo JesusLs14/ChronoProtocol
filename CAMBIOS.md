@@ -114,5 +114,16 @@
 - **Límite de Sobremarcha:** máximo 4 niveles (+15 % de velocidad cada uno sobre la velocidad original, hasta +60 %). La Batería Extra se detiene en 20 de vida, lo que cabe en el HUD.
 - **Precios que suben:** cada compra de la Clínica encarece la siguiente (Reparar +3, Sobremarcha +6, Batería +6) y los botones muestran el precio y nivel actuales. Las mejoras de arma también son más caras por nivel: Cadencia 10/18/28/40/55, Daño 15/30/50, Perforación 20/45.
 
+## Decimocuarta ronda: armas nuevas y mapa con obstáculos
+- **Tres armas nuevas en la Armería** (`player/weapons/`), con iconos pixel art (`shop_icons/draw_weapon_icons.py`) y sonido propio (`sfx/generate_sfx.py`: sniper, flame y laser):
+  - **Rifle de Francotirador** (20 fragmentos): un disparo cada 1.1 s, 6 de daño, muy rápido y atraviesa a todos los enemigos en línea.
+  - **Lanzallamas** (25): llamaradas que se abren, se frenan y se apagan a unos 250 px; atraviesan a los enemigos y dañan a cada uno una vez.
+  - **Láser** (30): rayo continuo mientras se mantiene el clic, 760 px de alcance, daña cada 0.12 s todo lo que toca; lo cortan paredes, columnas y barricadas.
+  - Las mejoras de Daño y Cadencia y la sobrecarga de racha también les afectan. Al comprarlas se equipan y se cambian con la rueda; los botones de armas ya compradas dicen "YA LA TIENES".
+  - La tienda es más alta para que quepan los 5 botones de la Armería.
+- **Obstáculos** (`player/props/arena_props.gd`): 8 columnas y 6 barricadas con franjas de peligro, colocadas por fracciones de la zona jugable. Bloquean el paso y detienen las balas de ambos lados (sirven de cobertura contra drones y el Soldado Cero); las granadas explotan al chocar con ellas.
+- **Barriles explosivos** (`player/props/explosive_barrel.gd`): 7 por el mapa, se reponen al empezar cada oleada lejos del soldado. Aguantan 3 de daño y explotan en 180 px: 8 de daño a los enemigos, 2 al soldado si está muy cerca, y hacen estallar a los barriles vecinos.
+- Las arañas rodean los obstáculos al chocar con ellos, los enemigos no aparecen encima de columnas, barricadas ni barriles, y la embestida del Hivelord termina si choca con algo.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

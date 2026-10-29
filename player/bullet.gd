@@ -12,6 +12,9 @@ var _hit_targets: Array[Node] = []
 func _ready() -> void:
 	$VisibleOnScreenNotifier2D.screen_exited.connect(_on_screen_exited)
 	area_entered.connect(_on_area_entered)
+	# También choca con paredes y obstáculos (capa 1).
+	collision_mask |= 1
+	body_entered.connect(_on_body_entered)
 
 
 func _process(delta: float) -> void:
@@ -38,6 +41,14 @@ func _on_area_entered(area: Area2D) -> void:
 	_hit_targets.append(target)
 	if pierce > 0:
 		pierce -= 1
+		return
+	queue_free()
+
+
+# Paredes y columnas detienen la bala. Los barriles se dañan por su hurtbox,
+# así que su cuerpo se ignora aquí; al jugador y a los enemigos también.
+func _on_body_entered(body: Node2D) -> void:
+	if body is CharacterBody2D or body.has_method("take_damage"):
 		return
 	queue_free()
 

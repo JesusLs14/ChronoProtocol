@@ -14,6 +14,9 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("player"):
+		# Las columnas, barricadas, barriles y paredes sirven de cobertura.
+		if not body is CharacterBody2D:
+			queue_free()
 		return
 
 	if body.has_method("take_damage"):

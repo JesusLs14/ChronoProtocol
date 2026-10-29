@@ -33,6 +33,11 @@ const RUN_ANIMATION_MIN_SPEED: float = 10.0
 @onready var anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hit_flash: HitFlashComponent = $HitFlashComponent
 @onready var weapon_manager: WeaponManager = $WeaponManager
+const SNIPER_WEAPON: WeaponData = preload("res://player/weapons/sniper_rifle.tres")
+const FLAMETHROWER_WEAPON: WeaponData = preload("res://player/weapons/flamethrower.tres")
+## Armas que no usan el sonido normal de disparo (tienen el suyo).
+const WEAPON_SOUNDS: Dictionary = {"sniper": "sniper", "flamethrower": "flame", "laser": "laser"}
+var _laser: LaserBeam
 @onready var muzzle: Marker2D = $Muzzle
 @onready var damage_overlay: ColorRect = $CanvasLayer/DamageOverlay
 
@@ -74,6 +79,9 @@ func _ready() -> void:
 	health_changed.connect(health_container.update_health)
 	health_changed.emit(current_health, max_health)
 	_build_aim_rig()
+	_laser = LaserBeam.new()
+	_laser.weapon_manager = weapon_manager
+	add_child(_laser)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -123,12 +131,21 @@ func _try_fire() -> void:
 		fired = weapon_manager.fire_at(target, 5, 45.0, 0.8)
 	elif current_weapon == "grenade_launcher":
 		fired = weapon_manager.fire_weapon_at(grenade_weapon, target)
+	elif current_weapon == "sniper":
+		fired = weapon_manager.fire_weapon_at(SNIPER_WEAPON, target)
+	elif current_weapon == "flamethrower":
+		fired = weapon_manager.fire_weapon_at(FLAMETHROWER_WEAPON, target)
+	elif current_weapon == "laser":
+		fired = _laser.fire(muzzle.global_position, target)
 	else:
 		fired = weapon_manager.fire_at(target)
 	if fired:
 		_aim_time_remaining = AIM_HOLD_TIME
 		_aim_rig.play_flash()
-		$SfxShoot.play()
+		if WEAPON_SOUNDS.has(current_weapon):
+			Sfx.play(WEAPON_SOUNDS[current_weapon], -4.0, 0.08)
+		else:
+			$SfxShoot.play()
 		if anim_sprite.animation != &"hurt":
 			anim_sprite.play("shoot")
 

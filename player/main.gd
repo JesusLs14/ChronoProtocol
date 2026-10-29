@@ -7,9 +7,16 @@ const MAIN_MENU_PATH: String = "res://menu/main_menu.tscn"
 # Pausa entre la muerte del jefe y la pantalla de victoria.
 const VICTORY_DELAY: float = 1.5
 ## Precio base de cada artículo de la tienda y cuánto sube con cada compra
-## (Reparar, Sobremarcha, Batería, Escopeta, Lanzagranadas).
-const SHOP_COSTS: Array[int] = [5, 8, 10, 12, 15]
-const SHOP_COST_STEPS: Array[int] = [3, 6, 6, 0, 0]
+## (Reparar, Sobremarcha, Batería, Escopeta, Lanzagranadas, Francotirador,
+## Lanzallamas, Láser).
+const SHOP_COSTS: Array[int] = [5, 8, 10, 12, 15, 20, 25, 30]
+const SHOP_COST_STEPS: Array[int] = [3, 6, 6, 0, 0, 0, 0, 0]
+## Armas de la Armería desde el índice 5: id del arma y nombre.
+const EXTRA_WEAPONS: Dictionary = {
+	5: ["sniper", "el Rifle de Francotirador"],
+	6: ["flamethrower", "el Lanzallamas"],
+	7: ["laser", "el Láser"],
+}
 ## Compras máximas de Sobremarcha (+15 % de velocidad cada una).
 const OVERDRIVE_MAX_LEVEL: int = 4
 const OVERDRIVE_BONUS: float = 0.15
@@ -61,8 +68,9 @@ var _run_counted: bool = false
 var _game_over_records: Label
 var _total_kills: int = 0
 # Veces que se compró cada artículo de la tienda (mismo orden que SHOP_COSTS).
-var _shop_bought: Array[int] = [0, 0, 0, 0, 0]
+var _shop_bought: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0]
 var _base_speed: float = 0.0
+var _props: ArenaProps
 var _victory_records: Label
 
 func _ready() -> void:
@@ -79,10 +87,16 @@ func _ready() -> void:
 	$UI/ShopPanel/ShopTabs/Clínica/ExtraBatteryButton.pressed.connect(_on_shop_purchase_pressed.bind(2))
 	$UI/ShopPanel/ShopTabs/Armería/ShotgunButton.pressed.connect(_on_shop_purchase_pressed.bind(3))
 	$UI/ShopPanel/ShopTabs/Armería/GrenadeLauncherButton.pressed.connect(_on_shop_purchase_pressed.bind(4))
+	$UI/ShopPanel/ShopTabs/Armería/SniperButton.pressed.connect(_on_shop_purchase_pressed.bind(5))
+	$UI/ShopPanel/ShopTabs/Armería/FlamethrowerButton.pressed.connect(_on_shop_purchase_pressed.bind(6))
+	$UI/ShopPanel/ShopTabs/Armería/LaserButton.pressed.connect(_on_shop_purchase_pressed.bind(7))
 	$UI/ShopPanel/ContinueButton.pressed.connect(_on_continue_pressed)
 	for kind: String in upgrade_buttons:
 		upgrade_buttons[kind].pressed.connect(_on_upgrade_pressed.bind(kind))
 	wave_ended.connect(_on_wave_ended)
+	_props = ArenaProps.new()
+	$Arena.add_child(_props)
+	_props.build(_arena_bounds(0.0))
 	var indicators := OffscreenIndicators.new()
 	$UI.add_child(indicators)
 	$UI.move_child(indicators, 0)
@@ -214,6 +228,9 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 	if option_index == 4 and player.has_grenade_launcher:
 		shop_status_label.text = "Ya tienes el Lanzagranadas"
 		return
+	if EXTRA_WEAPONS.has(option_index) and player.unlocked_weapons.has(EXTRA_WEAPONS[option_index][0]):
+		shop_status_label.text = "Ya tienes " + EXTRA_WEAPONS[option_index][1]
+		return
 	if option_index == 1 and _shop_bought[1] >= OVERDRIVE_MAX_LEVEL:
 		shop_status_label.text = "La Sobremarcha ya está al máximo"
 		return
@@ -252,6 +269,10 @@ func _on_shop_purchase_pressed(option_index: int) -> void:
 			player.equip_weapon("grenade_launcher")
 			print("Lanzagranadas comprado")
 			shop_status_label.text = "Lanzagranadas añadido al inventario"
+		5, 6, 7:
+			var weapon: Array = EXTRA_WEAPONS[option_index]
+			player.equip_weapon(weapon[0])
+			shop_status_label.text = "Compraste " + weapon[1]
 	shop_fragments_label.text = "Fragmentos de Núcleo: %d" % player.core_fragments
 	_refresh_shop_buttons(player)
 
@@ -368,6 +389,9 @@ func _start_wave(wave: int) -> void:
 	closing_magnet_active = false
 	_wave_has_ended = false
 	kill_streak.hold(false)
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player != null:
+		_props.restock_barrels(player.global_position)
 	if wave_director.is_boss_wave(wave):
 		_current_boss = wave_director.pick_boss(wave)
 	_announce_wave(wave)
@@ -421,7 +445,8 @@ func _pick_spawn_position(center: Vector2) -> Vector2:
 	var candidate := center
 	for attempt in range(16):
 		candidate = center + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * randf_range(400.0, 600.0)
-		if not bounds.has_area() or bounds.has_point(candidate):
+		var inside := not bounds.has_area() or bounds.has_point(candidate)
+		if inside and not _props.is_blocked(candidate, 70.0):
 			return candidate
 	return candidate.clamp(bounds.position, bounds.end)
 
@@ -465,6 +490,20 @@ func _refresh_shop_buttons(player: Player) -> void:
 	else:
 		battery.text = "Batería Extra — %d Fragmentos (+2 de vida máxima)" % _shop_cost(2)
 	battery.disabled = battery_maxed
+	# Armas que ya se tienen: el botón lo dice y se desactiva.
+	var armory := {
+		3: ["ShotgunButton", "shotgun", "Escopeta"],
+		4: ["GrenadeLauncherButton", "grenade_launcher", "Lanzagranadas"],
+		5: ["SniperButton", "sniper", "Rifle de Francotirador"],
+		6: ["FlamethrowerButton", "flamethrower", "Lanzallamas"],
+		7: ["LaserButton", "laser", "Láser"],
+	}
+	for index: int in armory:
+		var entry: Array = armory[index]
+		var button: Button = get_node("UI/ShopPanel/ShopTabs/Armería/" + entry[0])
+		var owned := player.unlocked_weapons.has(entry[1])
+		button.disabled = owned
+		button.text = ("%s — YA LA TIENES" % entry[2]) if owned else ("Comprar %s — %d Fragmentos" % [entry[2], _shop_cost(index)])
 
 
 ## Guarda en GameStats lo nuevo de esta partida (se puede llamar varias veces:

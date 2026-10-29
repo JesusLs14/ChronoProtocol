@@ -14,6 +14,11 @@ extends CharacterBody2D
 
 var _is_dead: bool = false
 var _attack_cooldown: float = 0.0
+# Rodeo de obstáculos: al chocar con una columna o barricada camina de lado
+# un momento hacia el lado que más lo acerca al soldado.
+const AVOID_TIME: float = 0.45
+var _avoid_direction: Vector2 = Vector2.ZERO
+var _avoid_time: float = 0.0
 
 
 func _ready() -> void:
@@ -49,13 +54,34 @@ func _physics_process(delta: float) -> void:
 	if player_in_attack_range:
 		velocity = Vector2.ZERO
 	else:
-		velocity = direction * speed
+		var heading := direction
+		if _avoid_time > 0.0:
+			_avoid_time -= delta
+			heading = (direction * 0.35 + _avoid_direction).normalized()
+		velocity = heading * speed
 	move_and_slide()
+	_check_obstacle_collision(direction)
 
 	if not player_in_attack_range and (
 			sprite.animation not in [&"Hurt", &"Attack"] or not sprite.is_playing()
 	):
 		sprite.play(&"Walk" if velocity != Vector2.ZERO else &"Idle")
+
+
+func _check_obstacle_collision(to_player: Vector2) -> void:
+	for index in get_slide_collision_count():
+		var collision := get_slide_collision(index)
+		if not collision.get_collider() is StaticBody2D:
+			continue
+		var side := collision.get_normal().orthogonal()
+		# Si ya rodeaba, sigue hacia el mismo lado para no quedarse oscilando.
+		if _avoid_time > 0.0 and side.dot(_avoid_direction) < 0.0:
+			side = -side
+		elif _avoid_time <= 0.0 and side.dot(to_player) < 0.0:
+			side = -side
+		_avoid_direction = side
+		_avoid_time = AVOID_TIME
+		return
 
 
 func _attack_player(player: Node2D) -> void:

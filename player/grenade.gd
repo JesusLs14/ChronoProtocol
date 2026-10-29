@@ -18,6 +18,11 @@ var _explosion_time: float = 0.0
 
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
+	# Explota al chocar con paredes y obstáculos (capa 1).
+	collision_mask |= 1
+	body_entered.connect(func(body: Node2D) -> void:
+		if not body is CharacterBody2D:
+			_explode())
 
 
 # La granada vuela hasta el punto apuntado (o hasta max_range) y explota allí.

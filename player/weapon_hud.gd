@@ -17,6 +17,18 @@ const WEAPONS: Dictionary = {
 		"name": "Lanzagranadas",
 		"icon": preload("res://player/shop_icons/icon_grenade_launcher.png"),
 	},
+	"sniper": {
+		"name": "Rifle de Francotirador",
+		"icon": preload("res://player/shop_icons/icon_sniper.png"),
+	},
+	"flamethrower": {
+		"name": "Lanzallamas",
+		"icon": preload("res://player/shop_icons/icon_flamethrower.png"),
+	},
+	"laser": {
+		"name": "Láser",
+		"icon": preload("res://player/shop_icons/icon_laser.png"),
+	},
 }
 
 @export var player_path: NodePath = ^"../.."
@@ -54,7 +66,7 @@ func _show_weapon(weapon_id: String, unlocked_count: int) -> void:
 	icon_rect.texture = data.get("icon", null)
 	# El icono del repetidor sale de la hoja pixel art: se escala sin suavizar.
 	icon_rect.texture_filter = (
-		CanvasItem.TEXTURE_FILTER_NEAREST if weapon_id == "pistol"
+		CanvasItem.TEXTURE_FILTER_NEAREST if weapon_id in ["pistol", "sniper", "flamethrower", "laser"]
 		else CanvasItem.TEXTURE_FILTER_LINEAR
 	)
 	name_label.text = data.get("name", weapon_id)

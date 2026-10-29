@@ -4,6 +4,9 @@
 - ui_click.wav: clic corto al pulsar un botón.
 - ui_hover.wav: tic suave al pasar el ratón o el foco por un botón.
 - pickup.wav: campanita de dos notas al recoger un fragmento.
+- sniper.wav: disparo seco y potente con eco metálico (francotirador).
+- flame.wav: soplido de fuego corto (lanzallamas, se repite mientras dispara).
+- laser.wav: zumbido eléctrico corto (láser, se repite mientras dispara).
 
 Uso: python generate_sfx.py  (necesita numpy)
 """
@@ -77,8 +80,37 @@ def pickup() -> np.ndarray:
     return tone * envelope
 
 
+def sniper() -> np.ndarray:
+    t = timeline(0.6)
+    crack = rng.uniform(-1, 1, len(t)) * np.exp(-t * 40.0)
+    body = lowpass(rng.uniform(-1, 1, len(t)), 0.7) * np.exp(-t * 9.0)
+    frequency = 160.0 * np.exp(-t * 8.0) + 50.0
+    thump = np.sin(2 * np.pi * np.cumsum(frequency) / RATE) * np.exp(-t * 10.0)
+    ring = np.sin(2 * np.pi * 2900.0 * t) * np.exp(-t * 14.0) * 0.12
+    return crack + body + thump + ring
+
+
+def flame() -> np.ndarray:
+    t = timeline(0.16)
+    roar = lowpass(rng.uniform(-1, 1, len(t)), 0.8)
+    hiss = lowpass(rng.uniform(-1, 1, len(t)), 0.3) * 0.3
+    envelope = np.minimum(t / 0.02, 1.0) * np.exp(-t * 9.0)
+    return (roar + hiss) * envelope
+
+
+def laser() -> np.ndarray:
+    t = timeline(0.12)
+    buzz = np.sign(np.sin(2 * np.pi * 180.0 * t)) * 0.4
+    tone = np.sin(2 * np.pi * (900.0 + 140.0 * np.sin(2 * np.pi * 35.0 * t)) * t)
+    envelope = np.minimum(t / 0.01, 1.0) * np.exp(-t * 12.0)
+    return lowpass(buzz + tone, 0.4) * envelope
+
+
 if __name__ == "__main__":
     save("explosion.wav", explosion())
     save("ui_click.wav", ui_click(), 0.6)
     save("ui_hover.wav", ui_hover(), 0.35)
     save("pickup.wav", pickup(), 0.55)
+    save("sniper.wav", sniper(), 0.85)
+    save("flame.wav", flame(), 0.5)
+    save("laser.wav", laser(), 0.4)

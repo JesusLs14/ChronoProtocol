@@ -10,6 +10,9 @@ const SOUNDS: Dictionary = {
 	"click": preload("res://sfx/ui_click.wav"),
 	"hover": preload("res://sfx/ui_hover.wav"),
 	"pickup": preload("res://sfx/pickup.wav"),
+	"sniper": preload("res://sfx/sniper.wav"),
+	"flame": preload("res://sfx/flame.wav"),
+	"laser": preload("res://sfx/laser.wav"),
 }
 const POOL_SIZE: int = 8
 ## Tiempo mínimo entre dos reproducciones del mismo sonido, para que el imán

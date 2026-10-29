@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://player/bullet.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://player/54.png" id="2_texture"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sniper"]
+size = Vector2(140, 14)
+
+[node name="SniperBullet" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_script")
+speed = 2000.0
+damage = 6
+pierce = 99
+
+[node name="Trail" type="Line2D" parent="."]
+points = PackedVector2Array(-260, 0, 40, 0)
+width = 5.0
+default_color = Color(0.55, 1, 1, 0.55)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.6, 1, 1, 1)
+scale = Vector2(1.4, 0.35)
+texture = ExtResource("2_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_sniper")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-10, -5, 20, 10)
