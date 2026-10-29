@@ -8,17 +8,17 @@ const UPGRADES: Dictionary = {
 	"fire_rate": {
 		"name": "Cadencia",
 		"effect": "+15 %",
-		"costs": [10, 15, 20, 25, 30],
+		"costs": [10, 18, 28, 40, 55],
 	},
 	"damage": {
 		"name": "Daño",
 		"effect": "+1 por bala",
-		"costs": [15, 25, 35],
+		"costs": [15, 30, 50],
 	},
 	"pierce": {
 		"name": "Perforación",
 		"effect": "atraviesa +1",
-		"costs": [20, 35],
+		"costs": [20, 45],
 	},
 }
 const FIRE_RATE_PER_LEVEL: float = 0.15

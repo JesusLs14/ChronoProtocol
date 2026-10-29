@@ -107,5 +107,12 @@
 - **Jefes al azar** (`wave_director.gd`): oleada 5 Hivelord, oleada 10 Soldado Cero y desde la 15, cada 5 oleadas, uno al azar. Cada aparición sube un nivel: el Hivelord tiene 50 % más de vida y ataca 8 % más seguido por nivel; el Soldado Cero gana 120 de vida, más balas por ráfaga, más velocidad y más agresividad. El aviso de la oleada dice qué jefe se acerca.
 - Los jefes llevan el grupo "boss" (flechas, estallido grande y el EMS no los paraliza) y comparten `configure()`, `start_fight()`, `intro_roar()` e `intro_settle()` para la entrada.
 
+## Decimotercera ronda: aparición de enemigos, pantalla de muerte, español y tienda
+- **Enemigos fuera del mapa:** antes aparecían a 400-600 px del soldado en cualquier dirección, y cerca de una pared podían quedar del otro lado (los drones, que no se mueven, se quedaban ahí sin verse). Ahora el punto se elige solo dentro de las paredes con 80 px de margen (`Arena.playable_rect()`, `main.gd::_pick_spawn_position`); en una prueba con el soldado en las 4 esquinas y en el centro, 0 de 1500 apariciones cayeron fuera. El jefe también aparece siempre dentro.
+- **Pantalla de muerte nueva:** fondo rojo oscuro que aparece con fundido, título "HAS CAÍDO" que cae con un golpe, una frase al azar, puntaje, oleada alcanzada, bajas y mejor racha, los récords y botones REINTENTAR y MENÚ PRINCIPAL, que entran uno tras otro.
+- **Todo en español:** PUNTAJE, OLEADA / BAJAS / JEFE, OLEADA COMPLETADA, Fragmentos de Núcleo, ¡ALERTA: JEFE!, JEFE DERROTADO, Puntaje y "de vida" en lugar de HP.
+- **Límite de Sobremarcha:** máximo 4 niveles (+15 % de velocidad cada uno sobre la velocidad original, hasta +60 %). La Batería Extra se detiene en 20 de vida, lo que cabe en el HUD.
+- **Precios que suben:** cada compra de la Clínica encarece la siguiente (Reparar +3, Sobremarcha +6, Batería +6) y los botones muestran el precio y nivel actuales. Las mejoras de arma también son más caras por nivel: Cadencia 10/18/28/40/55, Daño 15/30/50, Perforación 20/45.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

@@ -78,7 +78,7 @@ theme_override_colors/font_color = Color(0.85, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 30
-text = "SCORE 0"
+text = "PUNTAJE 0"
 
 [node name="WaveTimeLabel" type="Label" parent="UI" unique_id=412783599]
 offset_left = 16.0
@@ -88,7 +88,7 @@ offset_bottom = 82.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
-text = "WAVE 1  |  KILLS 0/15"
+text = "OLEADA 1  |  BAJAS 0/15"
 
 [node name="ShopPanel" type="ColorRect" parent="UI" unique_id=412783600]
 process_mode = 2
@@ -127,7 +127,7 @@ offset_bottom = 52.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.2, 1, 0.9, 1)
 theme_override_font_sizes/font_size = 34
-text = "WAVE COMPLETE"
+text = "OLEADA COMPLETADA"
 horizontal_alignment = 1
 
 [node name="ShopFragmentsLabel" type="Label" parent="UI/ShopPanel" unique_id=1102704891]
@@ -141,7 +141,7 @@ offset_right = 220.0
 offset_bottom = 80.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 20
-text = "Core Fragments: 0"
+text = "Fragmentos de Núcleo: 0"
 horizontal_alignment = 1
 
 [node name="ShopTabs" type="TabContainer" parent="UI/ShopPanel" unique_id=1945336118]
@@ -409,7 +409,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.15, 0.12, 1)
 theme_override_font_sizes/font_size = 48
-text = "WARNING: BOSS"
+text = "¡ALERTA: JEFE!"
 horizontal_alignment = 1
 
 [node name="GameOverPanel" type="ColorRect" parent="UI" unique_id=239961889]
@@ -420,71 +420,78 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.75)
+color = Color(0.09, 0, 0.02, 0.85)
 
-[node name="GameOverLabel" type="Label" parent="UI/GameOverPanel" unique_id=1242780699]
-layout_mode = 1
+[node name="Content" type="VBoxContainer" parent="UI/GameOverPanel" unique_id=239961890]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -90.0
-offset_right = 240.0
-offset_bottom = -20.0
+offset_left = -600.0
+offset_top = -340.0
+offset_right = 600.0
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 48
-text = "Game Over"
+theme = ExtResource("13_menu_theme")
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="GameOverLabel" type="Label" parent="UI/GameOverPanel/Content" unique_id=1242780699]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.22, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0, 0, 1)
+theme_override_constants/outline_size = 18
+theme_override_font_sizes/font_size = 104
+text = "HAS CAÍDO"
 horizontal_alignment = 1
 
-[node name="FinalScoreLabel" type="Label" parent="UI/GameOverPanel" unique_id=494319665]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -10.0
-offset_right = 200.0
-offset_bottom = 30.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="SubtitleLabel" type="Label" parent="UI/GameOverPanel/Content" unique_id=239961891]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.65, 0.6, 1)
+theme_override_font_sizes/font_size = 28
+text = "La Colmena reclama otro soldado."
+horizontal_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="UI/GameOverPanel/Content" unique_id=239961892]
+custom_minimum_size = Vector2(520, 3)
+layout_mode = 2
+size_flags_horizontal = 4
+color = Color(1, 0.25, 0.2, 0.6)
+
+[node name="FinalScoreLabel" type="Label" parent="UI/GameOverPanel/Content" unique_id=494319665]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+text = "Puntaje: 0"
+horizontal_alignment = 1
+
+[node name="RecordsLabel" type="Label" parent="UI/GameOverPanel/Content" unique_id=239961893]
+layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Score: 0"
 horizontal_alignment = 1
 
-[node name="RetryButton" type="Button" parent="UI/GameOverPanel" unique_id=2141293495]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -80.0
-offset_top = 50.0
-offset_right = 80.0
-offset_bottom = 90.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Retry"
+[node name="Spacer" type="Control" parent="UI/GameOverPanel/Content" unique_id=239961894]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
 
-[node name="MenuButton" type="Button" parent="UI/GameOverPanel" unique_id=1588204417]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -110.0
-offset_top = 105.0
-offset_right = 110.0
-offset_bottom = 145.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Menú principal"
+[node name="Buttons" type="HBoxContainer" parent="UI/GameOverPanel/Content" unique_id=239961895]
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="RetryButton" type="Button" parent="UI/GameOverPanel/Content/Buttons" unique_id=2141293495]
+custom_minimum_size = Vector2(320, 70)
+layout_mode = 2
+text = "REINTENTAR"
+
+[node name="MenuButton" type="Button" parent="UI/GameOverPanel/Content/Buttons" unique_id=1588204417]
+custom_minimum_size = Vector2(320, 70)
+layout_mode = 2
+text = "MENÚ PRINCIPAL"
 
 [node name="VictoryPanel" type="ColorRect" parent="UI" unique_id=1734021551]
 process_mode = 3
@@ -548,7 +555,7 @@ offset_bottom = 10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 34
-text = "Score: 0"
+text = "Puntaje: 0"
 horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="UI/VictoryPanel" unique_id=1734021555]

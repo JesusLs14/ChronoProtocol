@@ -42,3 +42,14 @@ func _apply_camera_limits() -> void:
 	camera.limit_right = ceili(max_x)
 	camera.limit_top = floori(min_y)
 	camera.limit_bottom = ceili(max_y)
+
+
+## Zona jugable (dentro de las paredes) en coordenadas globales, recortada
+## por margin. Sirve para que los enemigos no aparezcan fuera del mapa.
+func playable_rect(margin: float = 0.0) -> Rect2:
+	var used_rect := arena_layer.get_used_rect()
+	var tile_size := Vector2(arena_layer.tile_set.tile_size)
+	# Centro de la primera y última celda + media celda = borde interior de la pared.
+	var top_left := arena_layer.to_global(arena_layer.map_to_local(used_rect.position) + tile_size * 0.5)
+	var bottom_right := arena_layer.to_global(arena_layer.map_to_local(used_rect.end - Vector2i.ONE) - tile_size * 0.5)
+	return Rect2(top_left, bottom_right - top_left).abs().grow(-margin)
