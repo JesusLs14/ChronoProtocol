@@ -8,6 +8,8 @@ extends RefCounted
 const BONUS_CHANCE: float = 0.25
 const SCATTER_MIN: float = 30.0
 const SCATTER_MAX: float = 90.0
+## Lo sube el evento Frenesí dorado (doble de orbes).
+static var multiplier: int = 1
 
 
 static func drop(fragment_scene: PackedScene, parent: Node, at: Vector2, count: int) -> void:
@@ -16,6 +18,7 @@ static func drop(fragment_scene: PackedScene, parent: Node, at: Vector2, count: 
 		return
 	if randf() < BONUS_CHANCE:
 		count += 1
+	count *= multiplier
 	for index in range(count):
 		var fragment := fragment_scene.instantiate() as Node2D
 		if fragment == null:

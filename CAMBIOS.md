@@ -125,5 +125,15 @@
 - **Barriles explosivos** (`player/props/explosive_barrel.gd`): 7 por el mapa, se reponen al empezar cada oleada lejos del soldado. Aguantan 3 de daño y explotan en 180 px: 8 de daño a los enemigos, 2 al soldado si está muy cerca, y hacen estallar a los barriles vecinos.
 - Las arañas rodean los obstáculos al chocar con ellos, los enemigos no aparecen encima de columnas, barricadas ni barriles, y la embestida del Hivelord termina si choca con algo.
 
+## Decimoquinta ronda: eventos de oleada, Arsenal y la Reina de la Colmena
+- **Eventos de oleada** (`player/wave_events.gd`): desde la oleada 3, cada oleada normal tiene 40 % de probabilidad de traer un evento (nunca dos seguidos). Se anuncia en el aviso de la oleada y queda en el HUD:
+  - **Enjambre:** solo arañas y arañas veloces, 60 % más bajas y aparecen mucho más seguido.
+  - **Apagón:** todo se oscurece salvo un círculo de luz que sigue al soldado (shader sobre el mapa).
+  - **Lluvia de meteoritos:** caen meteoritos cerca del soldado con aviso de 1.2 s; dañan al soldado y a los enemigos (y a los barriles).
+  - **Frenesí dorado:** enemigos 30 % más rápidos y dorados, pero dan doble puntaje y doble de orbes.
+  - **Artillería:** solo drones, más seguidos y menos bajas necesarias; toca usar las coberturas.
+- **Arsenal** (botón nuevo del menú, `menu/arsenal_panel.gd`, datos en `GameStats`): los fragmentos que te sobran al terminar una partida (morir, reintentar o salir) se guardan y la pantalla de muerte dice cuántos. Con ellos se compran mejoras permanentes: Blindaje reforzado (+1 de vida inicial, 5 niveles), Reserva de fragmentos (+6 al empezar, 4 niveles), Equipo inicial (empezar con Escopeta y luego también Lanzagranadas), Logística orbital (estratagemas 10 % más rápidas, 3 niveles) y Adrenalina (+1 s para la racha, 2 niveles).
+- **Tercer jefe: la Reina de la Colmena** (`enemy/hive_queen.gd`, `hive_queen.tscn`): enorme y lenta, se queda a distancia. Pone huevos que eclosionan en arañas si no se rompen a tiempo (barra rosa encima de cada huevo), escupe ácido que deja charcos que queman, y chilla lanzando un anillo de proyectiles. Furiosa: más huevos, más ácido y anillos dobles. Sale en la oleada 15 y desde la 20 los tres jefes salen al azar. Sus sprites (cuerpo con idle, poner huevos, chillido y muerte, y los huevos que laten y se rompen) salen de las imágenes de Gemini en `enemy/queen_art/source/`; `prepare_queen_art.py` les quita el fondo verde y la cuadrícula sin borrar las venas verdes.
+
 ## No traído
 - Las animaciones nuevas del jefe de ChronoProtocol: esta carpeta usa otro sprite del jefe (`hivelord.png`) con sus propios ataques.

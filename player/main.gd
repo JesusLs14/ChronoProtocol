@@ -31,10 +31,15 @@ const DEATH_SUBTITLES: Array[String] = [
 	"El enjambre no perdona.",
 	"Otro nombre para el muro de los caídos.",
 ]
-const BOSS_NAMES: Dictionary = {"hivelord": "el Hivelord", "soldier": "el Soldado Cero"}
+const BOSS_NAMES: Dictionary = {
+	"hivelord": "el Hivelord",
+	"soldier": "el Soldado Cero",
+	"queen": "la Reina de la Colmena",
+}
 
 @export var boss_scene: PackedScene
 @export var soldier_boss_scene: PackedScene
+@export var queen_boss_scene: PackedScene
 @onready var score_label = $UI/ScoreLabel
 @onready var game_over_panel = $UI/GameOverPanel
 @onready var final_score_label: Label = $UI/GameOverPanel/Content/FinalScoreLabel
@@ -71,6 +76,9 @@ var _total_kills: int = 0
 var _shop_bought: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0]
 var _base_speed: float = 0.0
 var _props: ArenaProps
+var _events: WaveEvents
+var _run_banked: bool = false
+var _banked_amount: int = 0
 var _victory_records: Label
 
 func _ready() -> void:
@@ -97,6 +105,10 @@ func _ready() -> void:
 	_props = ArenaProps.new()
 	$Arena.add_child(_props)
 	_props.build(_arena_bounds(0.0))
+	_events = WaveEvents.new()
+	add_child(_events)
+	_events.setup(_arena_bounds(0.0))
+	_apply_unlocks()
 	var indicators := OffscreenIndicators.new()
 	$UI.add_child(indicators)
 	$UI.move_child(indicators, 0)
@@ -111,7 +123,7 @@ func add_score(points: int) -> void:
 
 
 func register_enemy_kill(points: int = 10) -> void:
-	add_score(points)
+	add_score(points * _events.score_multiplier())
 	_run_kills += 1
 	_total_kills += 1
 	kill_streak.register_kill()
@@ -133,6 +145,8 @@ func show_game_over() -> void:
 	$UI/GameOverPanel/Content/SubtitleLabel.text = DEATH_SUBTITLES.pick_random()
 	wave_banner.hide()
 	_show_records(_game_over_records, commit_stats())
+	if _banked_amount > 0:
+		_game_over_records.text += "\n+%d fragmentos guardados en el Arsenal (total: %d)" % [_banked_amount, GameStats.bank]
 	_animate_game_over()
 
 
@@ -174,6 +188,7 @@ func end_wave() -> void:
 	_wave_has_ended = true
 	spawn_timer.stop()
 	kill_streak.hold(true)
+	_events.end_event()
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		enemy.queue_free()
 	call_deferred("_finish_wave_transition")
@@ -300,7 +315,11 @@ func spawn_boss() -> void:
 	boss_warning_label.show()
 	await get_tree().create_timer(1.5).timeout
 	boss_warning_label.hide()
-	var scene := soldier_boss_scene if _current_boss == "soldier" else boss_scene
+	var scene: PackedScene = {
+		"hivelord": boss_scene,
+		"soldier": soldier_boss_scene,
+		"queen": queen_boss_scene,
+	}.get(_current_boss, boss_scene)
 	if scene == null:
 		push_error("Cannot spawn boss '%s': its scene is not assigned." % _current_boss)
 		return
@@ -319,7 +338,7 @@ func spawn_boss() -> void:
 	# Invisible hasta que la entrada lo hace caer del cielo.
 	boss.modulate.a = 0.0
 	add_child(boss)
-	var spawn_distance := 330.0 if _current_boss == "soldier" else 300.0
+	var spawn_distance := 330.0 if _current_boss == "soldier" else 250.0 if _current_boss == "queen" else 300.0
 	boss.global_position = clamp_to_arena(player.global_position + Vector2(0.0, -spawn_distance), 140.0)
 	boss.defeated.connect(_on_boss_defeated)
 	var player_node := player as Player
@@ -353,7 +372,7 @@ func show_victory() -> void:
 	spawn_timer.stop()
 	get_tree().paused = true
 	$UI/VictoryPanel/VictoryScoreLabel.text = "Puntaje: %d" % score
-	_show_records(_victory_records, commit_stats())
+	_show_records(_victory_records, commit_stats(false))
 	$UI/VictoryPanel.show()
 	$UI/VictoryPanel/Buttons/EndlessButton.grab_focus()
 
@@ -370,6 +389,8 @@ func _update_wave_progress() -> void:
 		wave_time_label.text = (prefix + "  |  JEFE") % current_wave
 		return
 
+	if _events.current != "":
+		prefix += "  |  " + _events.event_name()
 	wave_time_label.text = (prefix + "  |  BAJAS %d/%d") % [
 		current_wave,
 		enemies_killed,
@@ -392,6 +413,7 @@ func _start_wave(wave: int) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player != null:
 		_props.restock_barrels(player.global_position)
+	_events.begin_wave(wave, wave_director)
 	if wave_director.is_boss_wave(wave):
 		_current_boss = wave_director.pick_boss(wave)
 	_announce_wave(wave)
@@ -400,8 +422,8 @@ func _start_wave(wave: int) -> void:
 		spawn_boss()
 		return
 
-	enemies_to_kill = wave_director.kills_for_wave(wave)
-	spawn_timer.wait_time = wave_director.spawn_interval(wave)
+	enemies_to_kill = roundi(wave_director.kills_for_wave(wave) * _events.kills_multiplier())
+	spawn_timer.wait_time = wave_director.spawn_interval(wave) * _events.spawn_interval_multiplier()
 	_update_wave_progress()
 	spawn_timer.start()
 
@@ -419,6 +441,8 @@ func _announce_wave(wave: int) -> void:
 			subtitle = "Nuevos enemigos: " + ", ".join(names)
 		elif wave_director.is_endless(wave):
 			subtitle = "Los enemigos son más resistentes"
+		if _events.current != "":
+			subtitle = "¡EVENTO: %s! %s" % [_events.event_name(), _events.event_text()]
 	wave_banner.announce(title, subtitle)
 
 
@@ -431,8 +455,11 @@ func _spawn_enemy() -> void:
 		push_error("Cannot spawn enemy: no player exists in the player group.")
 		return
 
-	var variant := wave_director.pick_variant(current_wave)
+	var variant := _events.override_variant(wave_director)
+	if variant == null:
+		variant = wave_director.pick_variant(current_wave)
 	var enemy := variant.spawn(wave_director.difficulty(current_wave))
+	_events.modify_enemy(enemy)
 	add_child(enemy)
 	enemy.global_position = _pick_spawn_position(player.global_position)
 
@@ -508,13 +535,43 @@ func _refresh_shop_buttons(player: Player) -> void:
 
 ## Guarda en GameStats lo nuevo de esta partida (se puede llamar varias veces:
 ## solo suma lo que falta). Devuelve los récords superados.
-func commit_stats() -> PackedStringArray:
+## final = la partida terminó (muerte, reintentar o salir): entonces los
+## fragmentos que sobraron se guardan en el Arsenal, una sola vez.
+func commit_stats(final: bool = true) -> PackedStringArray:
+	if final and not _run_banked:
+		_run_banked = true
+		var player := get_tree().get_first_node_in_group("player") as Player
+		if player != null:
+			_banked_amount = player.core_fragments
+			GameStats.deposit(_banked_amount)
 	var games := 0 if _run_counted else 1
 	_run_counted = true
 	var records := GameStats.submit(score, kill_streak.best, current_wave, _run_kills, games, _run_bosses)
 	_run_kills = 0
 	_run_bosses = 0
 	return records
+
+
+# Mejoras permanentes compradas en el Arsenal del menú.
+func _apply_unlocks() -> void:
+	var player := get_node("player") as Player
+	var armor := GameStats.unlock_level("armor")
+	if armor > 0:
+		player.max_health = mini(MAX_HEALTH_CAP, player.max_health + armor)
+		player.current_health = player.max_health
+		player.health_changed.emit(player.current_health, player.max_health)
+	player.core_fragments += 6 * GameStats.unlock_level("reserve")
+	var kit := GameStats.unlock_level("arsenal")
+	if kit >= 1:
+		player.has_shotgun = true
+		player.equip_weapon("shotgun")
+	if kit >= 2:
+		player.has_grenade_launcher = true
+		player.equip_weapon("grenade_launcher")
+	if kit >= 1:
+		player.equip_weapon("pistol")
+	player.stratagems.cooldown_multiplier = 1.0 - 0.1 * GameStats.unlock_level("logistics")
+	kill_streak.streak_window += GameStats.unlock_level("adrenaline")
 
 
 func _make_records_label(panel: Control, top: float) -> Label:

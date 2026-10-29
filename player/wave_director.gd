@@ -41,13 +41,16 @@ func spawn_interval(wave: int) -> float:
 	return 1.5 if not is_endless(wave) else maxf(0.6, 1.2 - 0.05 * (wave - BOSS_WAVE))
 
 
-## Qué jefe sale: "hivelord" o "soldier".
+## Qué jefe sale: "hivelord" (oleada 5), "soldier" (10), "queen" (15) y
+## desde la 20 uno de los tres al azar.
 func pick_boss(wave: int) -> String:
 	if wave == BOSS_WAVE:
 		return "hivelord"
 	if wave == BOSS_WAVE + ENDLESS_BOSS_EVERY:
 		return "soldier"
-	return ["hivelord", "soldier"].pick_random()
+	if wave == BOSS_WAVE + ENDLESS_BOSS_EVERY * 2:
+		return "queen"
+	return ["hivelord", "soldier", "queen"].pick_random()
 
 
 ## Nivel de dificultad del jefe: 0 en la oleada 5, 1 en la 10, 2 en la 15...

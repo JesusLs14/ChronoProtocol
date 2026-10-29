@@ -113,7 +113,7 @@ func _run() -> void:
 	create_tween().tween_property(self, "_bars", 1.0, 0.4)
 
 	# La cámara viaja hasta el jefe mientras cae del cielo.
-	var sprite: AnimatedSprite2D = _boss.sprite
+	var sprite: Node2D = _boss.sprite
 	var sprite_home := sprite.position
 	sprite.position = sprite_home + Vector2(0, -DROP_HEIGHT)
 	sprite.modulate.a = 0.0

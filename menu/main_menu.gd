@@ -16,6 +16,8 @@ extends Control
 @onready var options_panel: Panel = $OptionsPanel
 @onready var options_back_button: Button = $OptionsPanel/OptionsBackButton
 @onready var stats_label: Label = $StatsLabel
+@onready var arsenal_button: Button = $Buttons/ArsenalButton
+var arsenal_panel: ArsenalPanel
 
 
 func _ready() -> void:
@@ -30,6 +32,11 @@ func _ready() -> void:
 	stats_label.text = GameStats.summary_text()
 	controls_panel.hide()
 	options_panel.hide()
+	arsenal_panel = ArsenalPanel.new()
+	add_child(arsenal_panel)
+	arsenal_panel.hide()
+	arsenal_panel.closed.connect(_on_arsenal_closed)
+	arsenal_button.pressed.connect(_on_arsenal_pressed)
 	play_button.grab_focus()
 	_animate_title()
 
@@ -42,6 +49,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif options_panel.visible:
 		_on_options_back_pressed()
+		get_viewport().set_input_as_handled()
+	elif arsenal_panel.visible:
+		_on_arsenal_closed()
 		get_viewport().set_input_as_handled()
 
 
@@ -77,6 +87,19 @@ func _on_options_back_pressed() -> void:
 	options_panel.hide()
 	buttons.show()
 	options_button.grab_focus()
+
+
+func _on_arsenal_pressed() -> void:
+	buttons.hide()
+	arsenal_panel.refresh()
+	arsenal_panel.show()
+	arsenal_panel.back_button.grab_focus()
+
+
+func _on_arsenal_closed() -> void:
+	arsenal_panel.hide()
+	buttons.show()
+	arsenal_button.grab_focus()
 
 
 func _on_quit_pressed() -> void:

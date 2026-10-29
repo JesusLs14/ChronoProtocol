@@ -57,6 +57,8 @@ const BEACON_SCENE: PackedScene = preload("res://player/stratagems/stratagem_bea
 var entering: bool = false
 var sequence: Array = []
 var cooldowns: Dictionary = {}
+## Menos de 1 = recargas más rápidas (mejora Logística orbital del Arsenal).
+var cooldown_multiplier: float = 1.0
 
 var _player: Player
 
@@ -111,7 +113,7 @@ func is_ready(id: String) -> bool:
 func cooldown_ratio(id: String) -> float:
 	for stratagem in STRATAGEMS:
 		if stratagem["id"] == id:
-			return cooldowns[id] / stratagem["cooldown"]
+			return cooldowns[id] / (stratagem["cooldown"] * cooldown_multiplier)
 	return 0.0
 
 
@@ -122,7 +124,7 @@ func _call(stratagem: Dictionary) -> void:
 	if not is_ready(id):
 		Sfx.play("click", -10.0, 0.0)
 		return
-	cooldowns[id] = stratagem["cooldown"]
+	cooldowns[id] = stratagem["cooldown"] * cooldown_multiplier
 	var from := _player.global_position
 	var target := _player._get_aim_position()
 	if from.distance_to(target) > THROW_RANGE:

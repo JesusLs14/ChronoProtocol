@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://player/arena.tscn" id="6_arena_scene"]
 [ext_resource type="PackedScene" uid="uid://cy7md8e3ahvh3" path="res://enemy/boss.tscn" id="7_boss"]
 [ext_resource type="PackedScene" path="res://enemy/corrupted_soldier.tscn" id="26_soldier_boss"]
+[ext_resource type="PackedScene" path="res://enemy/hive_queen.tscn" id="30_queen_boss"]
 [ext_resource type="PackedScene" path="res://menu/pause_menu.tscn" id="8_pause_menu"]
 [ext_resource type="Theme" path="res://menu/menu_theme.tres" id="13_menu_theme"]
 [ext_resource type="Script" path="res://player/wave_director.gd" id="15_wave_director"]
@@ -49,6 +50,7 @@ bg_color = Color(1, 0.8, 0.25, 1)
 script = ExtResource("3_main")
 boss_scene = ExtResource("7_boss")
 soldier_boss_scene = ExtResource("26_soldier_boss")
+queen_boss_scene = ExtResource("30_queen_boss")
 
 [node name="WaveDirector" type="Node" parent="." unique_id=1650422001]
 script = ExtResource("15_wave_director")

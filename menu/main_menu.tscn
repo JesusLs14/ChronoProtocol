@@ -90,25 +90,30 @@ offset_right = 200.0
 offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 16
 
 [node name="PlayButton" type="Button" parent="Buttons"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "JUGAR"
 
+[node name="ArsenalButton" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "ARSENAL"
+
 [node name="ControlsButton" type="Button" parent="Buttons"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "CONTROLES"
 
 [node name="OptionsButton" type="Button" parent="Buttons"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "OPCIONES"
 
 [node name="QuitButton" type="Button" parent="Buttons"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "SALIR"
 

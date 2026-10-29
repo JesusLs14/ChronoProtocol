@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://enemy/hive_queen.gd" id="1_script"]
+[ext_resource type="Script" path="res://enemy/health_component.gd" id="2_health"]
+[ext_resource type="PackedScene" path="res://enemy/boss_health_bar.tscn" id="3_health_bar"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 80.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurtbox"]
+radius = 100.0
+
+[node name="HiveQueen" type="CharacterBody2D" groups=["enemy", "boss"]]
+collision_layer = 2
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="." groups=["enemy_hurtbox"]]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurtbox")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 700
+
+[node name="BossHealthBar" parent="." instance=ExtResource("3_health_bar")]
+boss_name = "REINA DE LA COLMENA"
+normal_fill_color = Color(0.95, 0.25, 0.75, 1)
+enraged_fill_color = Color(0.5, 1, 0.3, 1)
